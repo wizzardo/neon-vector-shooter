@@ -10,13 +10,10 @@ targetCompatibility = 1.8
 
 version = '0.1'
 
-mainClassName = "MyApp"
+mainClassName = "com.wizzardo.neon.App"
 
 dependencies {
-	//compile files(
-    //        'lib-1.jar',
-    //        'lib-2.jar'
-    //)
+    compile fileTree(dir: '../libs/jme-3.1.0.alpha1', include: '*.jar')
 }
 
 //create a single Jar with all dependencies
