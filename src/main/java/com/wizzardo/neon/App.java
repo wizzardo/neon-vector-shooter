@@ -2,10 +2,15 @@ package com.wizzardo.neon;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
+import com.jme3.math.FastMath;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -15,8 +20,10 @@ import com.jme3.ui.Picture;
 /**
  * Created by wizzardo on 08.03.16.
  */
-public class App extends SimpleApplication implements ActionListener {
+public class App extends SimpleApplication implements ActionListener, AnalogListener {
     private Spatial player;
+    private Node bulletNode;
+    private long bulletCooldown;
 
     @Override
     public void simpleInitApp() {
@@ -28,6 +35,15 @@ public class App extends SimpleApplication implements ActionListener {
         setupPlayer();
 
         setupUserUnput();
+        setupBulletNode();
+
+
+    }
+
+    private void setupBulletNode() {
+        //        setup the bulletNode
+        bulletNode = new Node("bullets");
+        guiNode.attachChild(bulletNode);
     }
 
     private void setupUserUnput() {
@@ -41,10 +57,13 @@ public class App extends SimpleApplication implements ActionListener {
         inputManager.addListener(this, "up");
         inputManager.addListener(this, "down");
         inputManager.addListener(this, "return");
+
+        inputManager.addMapping("mousePick", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(this, "mousePick");
     }
 
     @Override
-    public void onAction(String name, boolean isPressed, float v) {
+    public void onAction(String name, boolean isPressed, float tpf) {
         if (player.getUserData("alive")) {
             if (name.equals("up")) {
                 player.getControl(PlayerControl.class).up = isPressed;
@@ -56,6 +75,44 @@ public class App extends SimpleApplication implements ActionListener {
                 player.getControl(PlayerControl.class).right = isPressed;
             }
         }
+    }
+
+    @Override
+    public void onAnalog(String name, float value, float tpf) {
+        if (player.getUserData("alive")) {
+            if (name.equals("mousePick")) {
+                //shoot Bullet
+                if (System.currentTimeMillis() - bulletCooldown > 83) {
+                    bulletCooldown = System.currentTimeMillis();
+
+                    Vector3f aim = getAimDirection();
+                    Vector3f offset = new Vector3f(aim.y / 3, -aim.x / 3, 0);
+
+//                    init bullet 1
+                    Spatial bullet = getSpatial("Bullet");
+                    Vector3f finalOffset = aim.add(offset).mult(30);
+                    Vector3f trans = player.getLocalTranslation().add(finalOffset);
+                    bullet.setLocalTranslation(trans);
+                    bullet.addControl(new BulletControl(aim, settings.getWidth(), settings.getHeight()));
+                    bulletNode.attachChild(bullet);
+
+//                    init bullet 2
+                    Spatial bullet2 = getSpatial("Bullet");
+                    finalOffset = aim.add(offset.negate()).mult(30);
+                    trans = player.getLocalTranslation().add(finalOffset);
+                    bullet2.setLocalTranslation(trans);
+                    bullet2.addControl(new BulletControl(aim, settings.getWidth(), settings.getHeight()));
+                    bulletNode.attachChild(bullet2);
+                }
+            }
+        }
+    }
+
+    private Vector3f getAimDirection() {
+        Vector2f mouse = inputManager.getCursorPosition();
+        Vector3f playerPos = player.getLocalTranslation();
+        Vector3f dif = new Vector3f(mouse.x - playerPos.x, mouse.y - playerPos.y, 0);
+        return dif.normalizeLocal();
     }
 
     private void setupPlayer() {
@@ -100,6 +157,15 @@ public class App extends SimpleApplication implements ActionListener {
 //        attach the picture to the node and return it
         node.attachChild(pic);
         return node;
+    }
+
+    public static float getAngleFromVector(Vector3f vec) {
+        Vector2f vec2 = new Vector2f(vec.x, vec.y);
+        return vec2.getAngle();
+    }
+
+    public static Vector3f getVectorFromAngle(float angle) {
+        return new Vector3f(FastMath.cos(angle), FastMath.sin(angle), 0);
     }
 
     public static void main(String[] args) {
