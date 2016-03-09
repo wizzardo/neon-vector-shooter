@@ -3,6 +3,7 @@ package com.wizzardo.neon;
 import com.jme3.math.FastMath;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 
 /**
@@ -13,6 +14,7 @@ public class PlayerControl extends AbstractControl {
     private int screenWidth, screenHeight;
     private float speed = 800f;
     private float lastRotation;
+    private PlayerNode player;
     public boolean up, down, left, right;
 
     public PlayerControl(int width, int height) {
@@ -21,32 +23,39 @@ public class PlayerControl extends AbstractControl {
     }
 
     @Override
+    public void setSpatial(Spatial spatial) {
+        super.setSpatial(spatial);
+        player = (PlayerNode) spatial;
+    }
+
+    @Override
     protected void controlUpdate(float tpf) {
 //        move the player in a certain direction
 //        if he is not out of the screen
+        PlayerNode player = this.player;
         if (up) {
-            if (spatial.getLocalTranslation().y < screenHeight - (Float) spatial.getUserData("radius")) {
-                spatial.move(0, tpf * speed, 0);
+            if (player.getLocalTranslation().y < screenHeight - player.getRadius()) {
+                player.move(0, tpf * speed, 0);
             }
-            spatial.rotate(0, 0, -lastRotation + FastMath.PI / 2);
+            player.rotate(0, 0, -lastRotation + FastMath.PI / 2);
             lastRotation = FastMath.PI / 2;
         } else if (down) {
-            if (spatial.getLocalTranslation().y > (Float) spatial.getUserData("radius")) {
-                spatial.move(0, tpf * -speed, 0);
+            if (player.getLocalTranslation().y > player.getRadius()) {
+                player.move(0, tpf * -speed, 0);
             }
-            spatial.rotate(0, 0, -lastRotation + FastMath.PI * 1.5f);
+            player.rotate(0, 0, -lastRotation + FastMath.PI * 1.5f);
             lastRotation = FastMath.PI * 1.5f;
         } else if (left) {
-            if (spatial.getLocalTranslation().x > (Float) spatial.getUserData("radius")) {
-                spatial.move(tpf * -speed, 0, 0);
+            if (player.getLocalTranslation().x > player.getRadius()) {
+                player.move(tpf * -speed, 0, 0);
             }
-            spatial.rotate(0, 0, -lastRotation + FastMath.PI);
+            player.rotate(0, 0, -lastRotation + FastMath.PI);
             lastRotation = FastMath.PI;
         } else if (right) {
-            if (spatial.getLocalTranslation().x < screenWidth - (Float) spatial.getUserData("radius")) {
-                spatial.move(tpf * speed, 0, 0);
+            if (player.getLocalTranslation().x < screenWidth - player.getRadius()) {
+                player.move(tpf * speed, 0, 0);
             }
-            spatial.rotate(0, 0, -lastRotation + 0);
+            player.rotate(0, 0, -lastRotation + 0);
             lastRotation = 0;
         }
     }
