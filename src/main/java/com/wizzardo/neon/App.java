@@ -34,7 +34,7 @@ public class App extends SimpleApplication implements ActionListener, AnalogList
 //        setDisplayFps(false);
         setupPlayer();
 
-        setupUserUnput();
+        setupUserInput();
         setupBulletNode();
 
 
@@ -46,7 +46,7 @@ public class App extends SimpleApplication implements ActionListener, AnalogList
         guiNode.attachChild(bulletNode);
     }
 
-    private void setupUserUnput() {
+    private void setupUserInput() {
         inputManager.addMapping("left", new KeyTrigger(KeyInput.KEY_LEFT));
         inputManager.addMapping("right", new KeyTrigger(KeyInput.KEY_RIGHT));
         inputManager.addMapping("up", new KeyTrigger(KeyInput.KEY_UP));
