@@ -21,7 +21,7 @@ import com.jme3.ui.Picture;
  * Created by wizzardo on 08.03.16.
  */
 public class App extends SimpleApplication implements ActionListener, AnalogListener {
-    private Spatial player;
+    private PlayerNode player;
     private Node bulletNode;
     private long bulletCooldown;
 
@@ -52,10 +52,10 @@ public class App extends SimpleApplication implements ActionListener, AnalogList
         inputManager.addMapping("up", new KeyTrigger(KeyInput.KEY_UP));
         inputManager.addMapping("down", new KeyTrigger(KeyInput.KEY_DOWN));
         inputManager.addMapping("return", new KeyTrigger(KeyInput.KEY_RETURN));
-        inputManager.addListener(this, "left");
-        inputManager.addListener(this, "right");
-        inputManager.addListener(this, "up");
-        inputManager.addListener(this, "down");
+        inputManager.addListener((ActionListener) (s, b, v) -> player.ifAlive(it -> it.getControl().left = b), "left");
+        inputManager.addListener((ActionListener) (s, b, v) -> player.ifAlive(it -> it.getControl().right = b), "right");
+        inputManager.addListener((ActionListener) (s, b, v) -> player.ifAlive(it -> it.getControl().down = b), "down");
+        inputManager.addListener((ActionListener) (s, b, v) -> player.ifAlive(it -> it.getControl().up = b), "up");
         inputManager.addListener(this, "return");
 
         inputManager.addMapping("mousePick", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
@@ -64,22 +64,11 @@ public class App extends SimpleApplication implements ActionListener, AnalogList
 
     @Override
     public void onAction(String name, boolean isPressed, float tpf) {
-        if (player.getUserData("alive")) {
-            if (name.equals("up")) {
-                player.getControl(PlayerControl.class).up = isPressed;
-            } else if (name.equals("down")) {
-                player.getControl(PlayerControl.class).down = isPressed;
-            } else if (name.equals("left")) {
-                player.getControl(PlayerControl.class).left = isPressed;
-            } else if (name.equals("right")) {
-                player.getControl(PlayerControl.class).right = isPressed;
-            }
-        }
     }
 
     @Override
     public void onAnalog(String name, float value, float tpf) {
-        if (player.getUserData("alive")) {
+        if (player.isAlive()) {
             if (name.equals("mousePick")) {
                 //shoot Bullet
                 if (System.currentTimeMillis() - bulletCooldown > 83) {
@@ -117,8 +106,7 @@ public class App extends SimpleApplication implements ActionListener, AnalogList
 
     private void setupPlayer() {
         //        setup the player
-        player = getSpatial("Player");
-        player.setUserData("alive", true);
+        player = getSpatial("Player", new PlayerNode("Player"));
         player.move(settings.getWidth() / 2, settings.getHeight() / 2, 0);
         player.addControl(new PlayerControl(settings.getWidth(), settings.getHeight()));
         guiNode.attachChild(player);
@@ -131,8 +119,11 @@ public class App extends SimpleApplication implements ActionListener, AnalogList
         getFlyByCamera().setEnabled(false);
     }
 
-    private Spatial getSpatial(String name) {
-        Node node = new Node(name);
+    private NodeSized getSpatial(String name) {
+        return getSpatial(name, new NodeSized(name));
+    }
+
+    private <T extends NodeSized> T getSpatial(String name, T node) {
 //        load picture
         Picture pic = new Picture(name);
         Texture2D tex = (Texture2D) assetManager.loadTexture("Textures/" + name + ".png");
@@ -152,7 +143,7 @@ public class App extends SimpleApplication implements ActionListener, AnalogList
 
 //        set the radius of the spatial
 //        (using width only as a simple approximation)
-        node.setUserData("radius", width / 2);
+        node.setRadius(width / 2);
 
 //        attach the picture to the node and return it
         node.attachChild(pic);
