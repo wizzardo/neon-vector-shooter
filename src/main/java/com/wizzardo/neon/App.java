@@ -20,7 +20,7 @@ import com.jme3.ui.Picture;
 /**
  * Created by wizzardo on 08.03.16.
  */
-public class App extends SimpleApplication implements ActionListener, AnalogListener {
+public class App extends SimpleApplication {
     private PlayerNode player;
     private Node bulletNode;
     private long bulletCooldown;
@@ -56,20 +56,12 @@ public class App extends SimpleApplication implements ActionListener, AnalogList
         inputManager.addListener((ActionListener) (s, b, v) -> player.ifAlive(it -> it.getControl().right = b), "right");
         inputManager.addListener((ActionListener) (s, b, v) -> player.ifAlive(it -> it.getControl().down = b), "down");
         inputManager.addListener((ActionListener) (s, b, v) -> player.ifAlive(it -> it.getControl().up = b), "up");
-        inputManager.addListener(this, "return");
+        inputManager.addListener((ActionListener) (s, b, v) -> {
+        }, "return");
 
         inputManager.addMapping("mousePick", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        inputManager.addListener(this, "mousePick");
-    }
-
-    @Override
-    public void onAction(String name, boolean isPressed, float tpf) {
-    }
-
-    @Override
-    public void onAnalog(String name, float value, float tpf) {
-        if (player.isAlive()) {
-            if (name.equals("mousePick")) {
+        inputManager.addListener((AnalogListener) (name, value, tpf) -> {
+            if (player.isAlive()) {
                 //shoot Bullet
                 if (System.currentTimeMillis() - bulletCooldown > 83) {
                     bulletCooldown = System.currentTimeMillis();
@@ -78,23 +70,27 @@ public class App extends SimpleApplication implements ActionListener, AnalogList
                     Vector3f offset = new Vector3f(aim.y / 3, -aim.x / 3, 0);
 
 //                    init bullet 1
-                    Spatial bullet = getSpatial("Bullet");
+                    Spatial bullet = createBullet(aim);
                     Vector3f finalOffset = aim.add(offset).mult(30);
                     Vector3f trans = player.getLocalTranslation().add(finalOffset);
                     bullet.setLocalTranslation(trans);
-                    bullet.addControl(new BulletControl(aim, settings.getWidth(), settings.getHeight()));
                     bulletNode.attachChild(bullet);
 
 //                    init bullet 2
-                    Spatial bullet2 = getSpatial("Bullet");
+                    Spatial bullet2 = createBullet(aim);
                     finalOffset = aim.add(offset.negate()).mult(30);
                     trans = player.getLocalTranslation().add(finalOffset);
                     bullet2.setLocalTranslation(trans);
-                    bullet2.addControl(new BulletControl(aim, settings.getWidth(), settings.getHeight()));
                     bulletNode.attachChild(bullet2);
                 }
             }
-        }
+        }, "mousePick");
+    }
+
+    private Spatial createBullet(Vector3f aim) {
+        Spatial bullet = getSpatial("Bullet");
+        bullet.addControl(new BulletControl(aim, settings.getWidth(), settings.getHeight()));
+        return bullet;
     }
 
     private Vector3f getAimDirection() {
