@@ -21,9 +21,10 @@ import com.jme3.ui.Picture;
  * Created by wizzardo on 08.03.16.
  */
 public class App extends SimpleApplication {
+    protected static final int SHOOT_COOL_DOWN = 83;
     private PlayerNode player;
     private Node bulletNode;
-    private long bulletCooldown;
+    private long lastShot;
 
     @Override
     public void simpleInitApp() {
@@ -63,8 +64,8 @@ public class App extends SimpleApplication {
         inputManager.addListener((AnalogListener) (name, value, tpf) -> {
             if (player.isAlive()) {
                 //shoot Bullet
-                if (System.currentTimeMillis() - bulletCooldown > 83) {
-                    bulletCooldown = System.currentTimeMillis();
+                if (System.currentTimeMillis() - lastShot > SHOOT_COOL_DOWN) {
+                    lastShot = System.currentTimeMillis();
 
                     Vector3f aim = getAimDirection();
                     Vector3f offset = new Vector3f(aim.y / 3, -aim.x / 3, 0);
