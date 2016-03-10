@@ -16,6 +16,10 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
+import com.wizzardo.neon.enemy.SeekerControl;
+import com.wizzardo.neon.enemy.WandererControl;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by wizzardo on 08.03.16.
@@ -25,6 +29,10 @@ public class App extends SimpleApplication {
     private PlayerNode player;
     private Node bulletNode;
     private long lastShot;
+
+    private long enemySpawnCooldown;
+    private float enemySpawnChance = 80;
+    private Node enemyNode;
 
     @Override
     public void simpleInitApp() {
@@ -37,12 +45,67 @@ public class App extends SimpleApplication {
 
         setupUserInput();
         setupBulletNode();
+        setupEnemyNode();
+    }
 
+    @Override
+    public void simpleUpdate(float tpf) {
+        if (player.isAlive()) {
+            spawnEnemies();
+        }
+    }
 
+    private void spawnEnemies() {
+        if (System.currentTimeMillis() - enemySpawnCooldown >= 17) {
+            enemySpawnCooldown = System.currentTimeMillis();
+
+            if (enemyNode.getQuantity() < 50) {
+                ThreadLocalRandom random = ThreadLocalRandom.current();
+                if (random.nextInt((int) enemySpawnChance) == 0) {
+                    createSeeker();
+                }
+                if (random.nextInt((int) enemySpawnChance) == 0) {
+                    createWanderer();
+                }
+            }
+            //increase Spawn Time
+            if (enemySpawnChance >= 1.1f) {
+                enemySpawnChance -= 0.005f;
+            }
+        }
+    }
+
+    private void createSeeker() {
+        Spatial seeker = getSpatial("Seeker");
+        seeker.setLocalTranslation(getSpawnPosition());
+        seeker.addControl(new SeekerControl(player));
+        seeker.setUserData("active", false);
+        enemyNode.attachChild(seeker);
+    }
+
+    private void createWanderer() {
+        Spatial wanderer = getSpatial("Wanderer");
+        wanderer.setLocalTranslation(getSpawnPosition());
+        wanderer.addControl(new WandererControl(settings.getWidth(), settings.getHeight()));
+        wanderer.setUserData("active", false);
+        enemyNode.attachChild(wanderer);
+    }
+
+    private Vector3f getSpawnPosition() {
+        Vector3f pos;
+        do {
+            ThreadLocalRandom random = ThreadLocalRandom.current();
+            pos = new Vector3f(random.nextInt(settings.getWidth()), random.nextInt(settings.getHeight()), 0);
+        } while (pos.distanceSquared(player.getLocalTranslation()) < 8000);
+        return pos;
+    }
+
+    private void setupEnemyNode() {
+        enemyNode = new Node("enemies");
+        guiNode.attachChild(enemyNode);
     }
 
     private void setupBulletNode() {
-        //        setup the bulletNode
         bulletNode = new Node("bullets");
         guiNode.attachChild(bulletNode);
     }
