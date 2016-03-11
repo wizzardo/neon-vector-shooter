@@ -26,6 +26,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class App extends SimpleApplication {
     protected static final int SHOOT_COOL_DOWN = 83;
+    private SoundManager soundManager;
     private PlayerNode player;
     private Node bulletNode;
     private long lastShot;
@@ -47,6 +48,8 @@ public class App extends SimpleApplication {
         setupUserInput();
         setupBulletNode();
         setupEnemyNode();
+        soundManager = new SoundManager(assetManager);
+        soundManager.startMusic();
     }
 
     @Override
@@ -78,6 +81,7 @@ public class App extends SimpleApplication {
                 if (checkCollision(((NodeSized) enemyNode.getChild(i)), (NodeSized) bulletNode.getChild(j))) {
                     enemyNode.detachChildAt(i);
                     bulletNode.detachChildAt(j);
+                    soundManager.explosion();
                     i--;
                     break;
                 }
@@ -97,6 +101,7 @@ public class App extends SimpleApplication {
         player.setAlive(false);
         player.setUserData("dieTime", System.currentTimeMillis());
         enemyNode.detachAllChildren();
+        soundManager.explosion();
     }
 
     private void spawnEnemies() {
@@ -125,6 +130,7 @@ public class App extends SimpleApplication {
         seeker.addControl(new SeekerControl(player));
         seeker.setUserData("active", false);
         enemyNode.attachChild(seeker);
+        soundManager.spawn();
     }
 
     private void createWanderer() {
@@ -133,6 +139,7 @@ public class App extends SimpleApplication {
         wanderer.addControl(new WandererControl(settings.getWidth(), settings.getHeight()));
         wanderer.setUserData("active", false);
         enemyNode.attachChild(wanderer);
+        soundManager.spawn();
     }
 
     private Vector3f getSpawnPosition() {
@@ -190,6 +197,8 @@ public class App extends SimpleApplication {
                     trans = player.getLocalTranslation().add(finalOffset);
                     bullet2.setLocalTranslation(trans);
                     bulletNode.attachChild(bullet2);
+
+                    soundManager.shoot();
                 }
             }
         }, "mousePick");
