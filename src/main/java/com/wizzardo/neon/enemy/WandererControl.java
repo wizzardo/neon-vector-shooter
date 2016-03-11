@@ -33,12 +33,11 @@ public class WandererControl extends AbstractControl {
 
     @Override
     protected void controlUpdate(float tpf) {
-        if ((Boolean) spatial.getUserData("active")) {
+        if (spatial.getUserData("active")) {
             // translate the wanderer
 
             // change the directionAngle a bit
             directionAngle += (ThreadLocalRandom.current().nextFloat() * 20f - 10f) * tpf;
-            System.out.println(directionAngle);
             Vector3f directionVector = App.getVectorFromAngle(directionAngle);
             directionVector.multLocal(1000f);
             velocity.addLocal(directionVector);
@@ -49,7 +48,7 @@ public class WandererControl extends AbstractControl {
 
             // make the wanderer bounce off the screen borders
             Vector3f loc = spatial.getLocalTranslation();
-            if (loc.x > screenWidth || loc.y > screenHeight) {
+            if (loc.x > screenWidth || loc.y > screenHeight || loc.x < 0 || loc.y < 0) {
                 Vector3f newDirectionVector = new Vector3f(screenWidth / 2, screenHeight / 2, 0).subtract(loc);
                 directionAngle = App.getAngleFromVector(newDirectionVector);
             }
