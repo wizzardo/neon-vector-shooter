@@ -33,6 +33,7 @@ public class App extends SimpleApplication {
     private long enemySpawnCooldown;
     private float enemySpawnChance = 80;
     private Node enemyNode;
+    private boolean gameOver = false;
 
     @Override
     public void simpleInitApp() {
@@ -52,7 +53,50 @@ public class App extends SimpleApplication {
     public void simpleUpdate(float tpf) {
         if (player.isAlive()) {
             spawnEnemies();
+            handleCollisions();
+        } else if (System.currentTimeMillis() - (Long) player.getUserData("dieTime") > 4000f && !gameOver) {
+            // spawn player
+            player.setLocalTranslation(settings.getWidth() / 2, settings.getHeight() / 2, 0);
+            guiNode.attachChild(player);
+            player.setAlive(true);
         }
+    }
+
+    private void handleCollisions() {
+        // should the player die?
+        for (int i = 0; i < enemyNode.getQuantity(); i++) {
+            if (enemyNode.getChild(i).getUserData("active")) {
+                if (checkCollision(player, (NodeSized) enemyNode.getChild(i))) {
+                    killPlayer();
+                }
+            }
+        }
+
+        //should an enemy die?
+        for (int i = 0; i < enemyNode.getQuantity(); i++) {
+            for (int j = 0; j < bulletNode.getQuantity(); j++) {
+                if (checkCollision(((NodeSized) enemyNode.getChild(i)), (NodeSized) bulletNode.getChild(j))) {
+                    enemyNode.detachChildAt(i);
+                    bulletNode.detachChildAt(j);
+                    i--;
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean checkCollision(NodeSized a, NodeSized b) {
+        float distance = a.getLocalTranslation().distance(b.getLocalTranslation());
+        float maxDistance = a.getRadius() + b.getRadius();
+        return distance <= maxDistance;
+    }
+
+    private void killPlayer() {
+        player.removeFromParent();
+        player.getControl().reset();
+        player.setAlive(false);
+        player.setUserData("dieTime", System.currentTimeMillis());
+        enemyNode.detachAllChildren();
     }
 
     private void spawnEnemies() {
