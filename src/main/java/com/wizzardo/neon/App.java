@@ -1,6 +1,7 @@
 package com.wizzardo.neon;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.cursors.plugins.JmeCursor;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -40,6 +41,7 @@ public class App extends SimpleApplication {
     private Node enemyNode;
     private Node blackHoleNode;
     private boolean gameOver = false;
+    private Hud hud;
 
     @Override
     public void simpleInitApp() {
@@ -55,7 +57,15 @@ public class App extends SimpleApplication {
         setupEnemyNode();
         setupBlackHoleNode();
         setupSound();
+        setupHud();
         addBloomFilter();
+
+        inputManager.setMouseCursor((JmeCursor) assetManager.loadAsset("Textures/Pointer.ico"));
+    }
+
+    private void setupHud() {
+        hud = new Hud(assetManager, guiNode, settings.getWidth(), settings.getHeight());
+        hud.reset();
     }
 
     private void setupSound() {
@@ -87,6 +97,7 @@ public class App extends SimpleApplication {
             guiNode.attachChild(player);
             player.setAlive(true);
         }
+        hud.update();
     }
 
     private void handleGravity(float tpf) {
@@ -157,11 +168,13 @@ public class App extends SimpleApplication {
 
         //should an enemy die?
         for (int i = 0; i < enemyNode.getQuantity(); i++) {
+            EnemyNode enemy = (EnemyNode) enemyNode.getChild(i);
             for (int j = 0; j < bulletNode.getQuantity(); j++) {
-                if (checkCollision(((NodeSized) enemyNode.getChild(i)), (NodeSized) bulletNode.getChild(j))) {
+                if (checkCollision(enemy, (NodeSized) bulletNode.getChild(j))) {
                     enemyNode.detachChildAt(i);
                     bulletNode.detachChildAt(j);
                     soundManager.explosion();
+                    hud.addPoints(enemy.getControl().getPoints());
                     i--;
                     break;
                 }
@@ -216,6 +229,11 @@ public class App extends SimpleApplication {
         enemyNode.detachAllChildren();
         blackHoleNode.detachAllChildren();
         soundManager.explosion();
+
+        if (!hud.removeLife()) {
+            hud.endGame();
+            gameOver = true;
+        }
     }
 
     private void spawnEnemies() {

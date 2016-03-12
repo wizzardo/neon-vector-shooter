@@ -55,4 +55,8 @@ public class EnemyControl extends AbstractControl {
     public void applyGravity(Vector3f gravity) {
         velocity.addLocal(gravity);
     }
+
+    public int getPoints() {
+        return 1;
+    }
 }

@@ -30,4 +30,9 @@ public class SeekerControl extends EnemyControl {
             spatial.rotate(0, 0, FastMath.PI / 2f);
         }
     }
+
+    @Override
+    public int getPoints() {
+        return 2;
+    }
 }

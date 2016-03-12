@@ -23,4 +23,9 @@ public class BlackHoleControl extends EnemyControl {
     public boolean isDead() {
         return hitpoints <= 0;
     }
+
+    @Override
+    public int getPoints() {
+        return 10;
+    }
 }
