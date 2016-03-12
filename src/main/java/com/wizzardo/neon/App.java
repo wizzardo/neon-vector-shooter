@@ -77,7 +77,7 @@ public class App extends SimpleApplication {
         if (player.isAlive()) {
             spawnEnemies();
             handleCollisions();
-        } else if (System.currentTimeMillis() - (Long) player.getUserData("dieTime") > 4000f && !gameOver) {
+        } else if (System.currentTimeMillis() - player.getDieTime() > 4000f && !gameOver) {
             // spawn player
             player.setLocalTranslation(settings.getWidth() / 2, settings.getHeight() / 2, 0);
             guiNode.attachChild(player);
@@ -119,7 +119,7 @@ public class App extends SimpleApplication {
         player.removeFromParent();
         player.getControl().reset();
         player.setAlive(false);
-        player.setUserData("dieTime", System.currentTimeMillis());
+        player.setDieTime(System.currentTimeMillis());
         enemyNode.detachAllChildren();
         soundManager.explosion();
     }

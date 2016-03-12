@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 public class PlayerNode extends NodeSized {
     private boolean alive = true;
     private PlayerControl control;
+    private long dieTime;
 
     public PlayerNode(String name) {
         super(name);
@@ -26,6 +27,14 @@ public class PlayerNode extends NodeSized {
 
     public void setAlive(boolean alive) {
         this.alive = alive;
+    }
+
+    public long getDieTime() {
+        return dieTime;
+    }
+
+    public void setDieTime(long dieTime) {
+        this.dieTime = dieTime;
     }
 
     @Override
