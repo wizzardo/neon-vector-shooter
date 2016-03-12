@@ -18,6 +18,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
+import com.wizzardo.neon.enemy.EnemyNode;
 import com.wizzardo.neon.enemy.SeekerControl;
 import com.wizzardo.neon.enemy.WandererControl;
 
@@ -87,7 +88,7 @@ public class App extends SimpleApplication {
     private void handleCollisions() {
         // should the player die?
         for (int i = 0; i < enemyNode.getQuantity(); i++) {
-            if (enemyNode.getChild(i).getUserData("active")) {
+            if (((EnemyNode) enemyNode.getChild(i)).getControl().isActive()) {
                 if (checkCollision(player, (NodeSized) enemyNode.getChild(i))) {
                     killPlayer();
                 }
@@ -144,20 +145,20 @@ public class App extends SimpleApplication {
     }
 
     private void createSeeker() {
-        Spatial seeker = getSpatial("Seeker");
-        seeker.setLocalTranslation(getSpawnPosition());
+        Spatial seeker = getSpatial("Seeker", new EnemyNode("Seeker"));
         seeker.addControl(new SeekerControl(player));
-        seeker.setUserData("active", false);
-        enemyNode.attachChild(seeker);
-        soundManager.spawn();
+        spawn(seeker);
     }
 
     private void createWanderer() {
-        Spatial wanderer = getSpatial("Wanderer");
-        wanderer.setLocalTranslation(getSpawnPosition());
+        Spatial wanderer = getSpatial("Wanderer", new EnemyNode("Wanderer"));
         wanderer.addControl(new WandererControl(settings.getWidth(), settings.getHeight()));
-        wanderer.setUserData("active", false);
-        enemyNode.attachChild(wanderer);
+        spawn(wanderer);
+    }
+
+    private void spawn(Spatial spatial) {
+        spatial.setLocalTranslation(getSpawnPosition());
+        enemyNode.attachChild(spatial);
         soundManager.spawn();
     }
 
@@ -257,7 +258,7 @@ public class App extends SimpleApplication {
 
     private <T extends NodeSized> T getSpatial(String name, T node) {
 //        load picture
-        Picture pic = new Picture(name);
+        Picture pic = new Picture("texture");
         Texture2D tex = (Texture2D) assetManager.loadTexture("Textures/" + name + ".png");
         pic.setTexture(assetManager, tex, true);
 
