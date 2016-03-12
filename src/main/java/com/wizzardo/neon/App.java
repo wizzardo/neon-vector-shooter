@@ -12,6 +12,8 @@ import com.jme3.material.RenderState;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.BloomFilter;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture2D;
@@ -48,8 +50,25 @@ public class App extends SimpleApplication {
         setupUserInput();
         setupBulletNode();
         setupEnemyNode();
+        setupSound();
+        addBloomFilter();
+    }
+
+    private void setupSound() {
         soundManager = new SoundManager(assetManager);
         soundManager.startMusic();
+    }
+
+    private void addBloomFilter() {
+        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
+        BloomFilter bloom = new BloomFilter();
+        bloom.setBloomIntensity(2f);
+        bloom.setExposurePower(2);
+        bloom.setExposureCutOff(0f);
+        bloom.setBlurScale(1.5f);
+        fpp.addFilter(bloom);
+        guiViewPort.addProcessor(fpp);
+        guiViewPort.setClearColor(true);
     }
 
     @Override
