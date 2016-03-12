@@ -13,7 +13,12 @@ version = '0.1'
 mainClassName = "com.wizzardo.neon.App"
 
 dependencies {
-    compile fileTree(dir: '../libs/jme-3.1.0.alpha1', include: '*.jar')
+    String jmeVersion = '3.1.0-alpha2'
+    compile "org.jmonkeyengine:jme3-core:$jmeVersion"
+    compile "org.jmonkeyengine:jme3-desktop:$jmeVersion"
+    compile "org.jmonkeyengine:jme3-lwjgl:$jmeVersion"
+    compile "org.jmonkeyengine:jme3-effects:$jmeVersion"
+    compile "org.jmonkeyengine:jme3-jogg:$jmeVersion"
 }
 
 //create a single Jar with all dependencies
