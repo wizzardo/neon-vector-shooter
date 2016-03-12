@@ -18,6 +18,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
+import com.wizzardo.neon.enemy.BlackHoleControl;
 import com.wizzardo.neon.enemy.EnemyNode;
 import com.wizzardo.neon.enemy.SeekerControl;
 import com.wizzardo.neon.enemy.WandererControl;
@@ -33,10 +34,11 @@ public class App extends SimpleApplication {
     private PlayerNode player;
     private Node bulletNode;
     private long lastShot;
-
+    private long spawnCooldownBlackHole;
     private long enemySpawnCooldown;
     private float enemySpawnChance = 80;
     private Node enemyNode;
+    private Node blackHoleNode;
     private boolean gameOver = false;
 
     @Override
@@ -51,6 +53,7 @@ public class App extends SimpleApplication {
         setupUserInput();
         setupBulletNode();
         setupEnemyNode();
+        setupBlackHoleNode();
         setupSound();
         addBloomFilter();
     }
@@ -77,12 +80,69 @@ public class App extends SimpleApplication {
         if (player.isAlive()) {
             spawnEnemies();
             handleCollisions();
+            handleGravity(tpf);
         } else if (System.currentTimeMillis() - player.getDieTime() > 4000f && !gameOver) {
             // spawn player
             player.setLocalTranslation(settings.getWidth() / 2, settings.getHeight() / 2, 0);
             guiNode.attachChild(player);
             player.setAlive(true);
         }
+    }
+
+    private void handleGravity(float tpf) {
+        for (int i = 0; i < blackHoleNode.getQuantity(); i++) {
+            EnemyNode blackHole = (EnemyNode) blackHoleNode.getChild(i);
+            if (!blackHole.getControl().isActive()) {
+                continue;
+            }
+            int radius = 250;
+
+            //check Player
+            if (isNearby(player, blackHole, radius)) {
+                applyGravity(blackHole, player, tpf);
+            }
+            //check Bullets
+            for (int j = 0; j < bulletNode.getQuantity(); j++) {
+                if (isNearby(bulletNode.getChild(j), blackHole, radius)) {
+                    applyGravity(blackHole, bulletNode.getChild(j), tpf);
+                }
+            }
+            //check Enemies
+            for (int j = 0; j < enemyNode.getQuantity(); j++) {
+                EnemyNode enemy = (EnemyNode) enemyNode.getChild(j);
+                if (!enemy.getControl().isActive()) {
+                    continue;
+                }
+                if (isNearby(enemy, blackHole, radius)) {
+                    applyGravity(blackHole, enemy, tpf);
+                }
+            }
+        }
+    }
+
+    private void applyGravity(Spatial blackHole, Spatial target, float tpf) {
+        Vector3f difference = blackHole.getLocalTranslation().subtract(target.getLocalTranslation());
+
+        Vector3f gravity = difference.normalize().multLocal(tpf);
+        float distance = difference.length();
+
+        if (target.getName().equals("Player")) {
+            gravity.multLocal(250f / distance);
+            target.getControl(PlayerControl.class).applyGravity(gravity.mult(80f));
+        } else if (target.getName().equals("Bullet")) {
+            gravity.multLocal(250f / distance);
+            target.getControl(BulletControl.class).applyGravity(gravity.mult(-0.8f));
+        } else if (target.getName().equals("Seeker")) {
+            target.getControl(SeekerControl.class).applyGravity(gravity.mult(150000));
+        } else if (target.getName().equals("Wanderer")) {
+            target.getControl(WandererControl.class).applyGravity(gravity.mult(150000));
+        }
+    }
+
+    private boolean isNearby(Spatial a, Spatial b, float distance) {
+        Vector3f pos1 = a.getLocalTranslation();
+        Vector3f pos2 = b.getLocalTranslation();
+        return pos1.distanceSquared(pos2) <= distance * distance;
     }
 
     private void handleCollisions() {
@@ -107,6 +167,39 @@ public class App extends SimpleApplication {
                 }
             }
         }
+
+        //is something colliding with a black hole?
+        for (int i = 0; i < blackHoleNode.getQuantity(); i++) {
+            EnemyNode blackHole = (EnemyNode) blackHoleNode.getChild(i);
+            if (blackHole.getControl().isActive()) {
+                //player
+                if (checkCollision(player, blackHole)) {
+                    killPlayer();
+                }
+
+                //enemies
+                for (int j = 0; j < enemyNode.getQuantity(); j++) {
+                    if (checkCollision((NodeSized) enemyNode.getChild(j), blackHole)) {
+                        enemyNode.detachChildAt(j);
+                        j--;
+                    }
+                }
+
+                //bullets
+                for (int j = 0; j < bulletNode.getQuantity(); j++) {
+                    if (checkCollision((NodeSized) bulletNode.getChild(j), blackHole)) {
+                        bulletNode.detachChildAt(j);
+                        BlackHoleControl control = (BlackHoleControl) blackHole.getControl();
+                        control.wasShot();
+                        if (control.isDead()) {
+                            blackHoleNode.detachChild(blackHole);
+                            soundManager.explosion();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private boolean checkCollision(NodeSized a, NodeSized b) {
@@ -121,12 +214,14 @@ public class App extends SimpleApplication {
         player.setAlive(false);
         player.setDieTime(System.currentTimeMillis());
         enemyNode.detachAllChildren();
+        blackHoleNode.detachAllChildren();
         soundManager.explosion();
     }
 
     private void spawnEnemies() {
-        if (System.currentTimeMillis() - enemySpawnCooldown >= 17) {
-            enemySpawnCooldown = System.currentTimeMillis();
+        long time = System.currentTimeMillis();
+        if (time - enemySpawnCooldown >= 17) {
+            enemySpawnCooldown = time;
 
             if (enemyNode.getQuantity() < 50) {
                 ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -137,11 +232,28 @@ public class App extends SimpleApplication {
                     createWanderer();
                 }
             }
+            if (blackHoleNode.getQuantity() < 5) {
+                if (time - spawnCooldownBlackHole > 10f) {
+                    spawnCooldownBlackHole = time;
+                    if (ThreadLocalRandom.current().nextInt(1000) == 0) {
+                        createBlackHole();
+                    }
+                }
+            }
             //increase Spawn Time
             if (enemySpawnChance >= 1.1f) {
                 enemySpawnChance -= 0.005f;
             }
         }
+    }
+
+    private void createBlackHole() {
+        Spatial blackHole = getSpatial("Black Hole", new EnemyNode("Black Hole"));
+        blackHole.addControl(new BlackHoleControl());
+
+        blackHole.setLocalTranslation(getSpawnPosition());
+        blackHoleNode.attachChild(blackHole);
+        soundManager.spawn();
     }
 
     private void createSeeker() {
@@ -176,16 +288,21 @@ public class App extends SimpleApplication {
         guiNode.attachChild(enemyNode);
     }
 
+    private void setupBlackHoleNode() {
+        blackHoleNode = new Node("blackHoles");
+        guiNode.attachChild(blackHoleNode);
+    }
+
     private void setupBulletNode() {
         bulletNode = new Node("bullets");
         guiNode.attachChild(bulletNode);
     }
 
     private void setupUserInput() {
-        inputManager.addMapping("left", new KeyTrigger(KeyInput.KEY_LEFT));
-        inputManager.addMapping("right", new KeyTrigger(KeyInput.KEY_RIGHT));
-        inputManager.addMapping("up", new KeyTrigger(KeyInput.KEY_UP));
-        inputManager.addMapping("down", new KeyTrigger(KeyInput.KEY_DOWN));
+        inputManager.addMapping("left", new KeyTrigger(KeyInput.KEY_LEFT), new KeyTrigger(KeyInput.KEY_A));
+        inputManager.addMapping("right", new KeyTrigger(KeyInput.KEY_RIGHT), new KeyTrigger(KeyInput.KEY_D));
+        inputManager.addMapping("up", new KeyTrigger(KeyInput.KEY_UP), new KeyTrigger(KeyInput.KEY_W));
+        inputManager.addMapping("down", new KeyTrigger(KeyInput.KEY_DOWN), new KeyTrigger(KeyInput.KEY_S));
         inputManager.addMapping("return", new KeyTrigger(KeyInput.KEY_RETURN));
         inputManager.addListener((ActionListener) (s, b, v) -> player.ifAlive(it -> it.getControl().left = b), "left");
         inputManager.addListener((ActionListener) (s, b, v) -> player.ifAlive(it -> it.getControl().right = b), "right");

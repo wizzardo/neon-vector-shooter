@@ -1,6 +1,7 @@
 package com.wizzardo.neon;
 
 import com.jme3.math.FastMath;
+import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
@@ -69,5 +70,9 @@ public class PlayerControl extends AbstractControl {
         down = false;
         left = false;
         right = false;
+    }
+
+    public void applyGravity(Vector3f gravity) {
+        spatial.move(gravity);
     }
 }

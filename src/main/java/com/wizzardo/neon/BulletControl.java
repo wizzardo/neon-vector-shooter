@@ -45,4 +45,8 @@ public class BulletControl extends AbstractControl {
     @Override
     protected void controlRender(RenderManager renderManager, ViewPort viewPort) {
     }
+
+    public void applyGravity(Vector3f gravity) {
+        direction.addLocal(gravity);
+    }
 }
