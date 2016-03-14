@@ -32,6 +32,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class App extends SimpleApplication {
     protected static final int SHOOT_COOL_DOWN = 83;
     private SoundManager soundManager;
+    private ParticleManager particleManager;
     private PlayerNode player;
     private Node bulletNode;
     private long lastShot;
@@ -61,6 +62,7 @@ public class App extends SimpleApplication {
         addBloomFilter();
 
         inputManager.setMouseCursor((JmeCursor) assetManager.loadAsset("Textures/Pointer.ico"));
+        particleManager = new ParticleManager(guiNode, getSpatial("Laser"), getSpatial("Glow"));
     }
 
     private void setupHud() {
@@ -171,10 +173,11 @@ public class App extends SimpleApplication {
             EnemyNode enemy = (EnemyNode) enemyNode.getChild(i);
             for (int j = 0; j < bulletNode.getQuantity(); j++) {
                 if (checkCollision(enemy, (NodeSized) bulletNode.getChild(j))) {
+                    soundManager.explosion();
+                    particleManager.enemyExplosion(enemy.getLocalTranslation());
+                    hud.addPoints(enemy.getControl().getPoints());
                     enemyNode.detachChildAt(i);
                     bulletNode.detachChildAt(j);
-                    soundManager.explosion();
-                    hud.addPoints(enemy.getControl().getPoints());
                     i--;
                     break;
                 }
