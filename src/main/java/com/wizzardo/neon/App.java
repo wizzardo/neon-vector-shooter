@@ -202,6 +202,7 @@ public class App extends SimpleApplication {
                 for (int j = 0; j < bulletNode.getQuantity(); j++) {
                     if (checkCollision((NodeSized) bulletNode.getChild(j), blackHole)) {
                         bulletNode.detachChildAt(j);
+                        j--;
                         BlackHoleControl control = (BlackHoleControl) blackHole.getControl();
                         control.wasShot();
                         if (control.isDead()) {
@@ -253,7 +254,7 @@ public class App extends SimpleApplication {
             if (blackHoleNode.getQuantity() < 5) {
                 if (time - spawnCooldownBlackHole > 10f) {
                     spawnCooldownBlackHole = time;
-                    if (ThreadLocalRandom.current().nextInt(1000) == 0) {
+                    if (ThreadLocalRandom.current().nextInt(500) == 0) {
                         createBlackHole();
                     }
                 }
