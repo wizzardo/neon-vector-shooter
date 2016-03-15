@@ -130,6 +130,15 @@ public class App extends SimpleApplication {
                     applyGravity(blackHole, enemy, tpf);
                 }
             }
+
+            // check Particles
+            Node particleNode = particleManager.getParticleNode();
+            for (int j = 0; j < particleNode.getQuantity(); j++) {
+                Spatial particle = particleNode.getChild(j);
+                if (particle.getUserData("affectedByGravity")) {
+                    applyGravity(blackHoleNode.getChild(i), particle, tpf);
+                }
+            }
         }
     }
 
@@ -149,6 +158,8 @@ public class App extends SimpleApplication {
             target.getControl(SeekerControl.class).applyGravity(gravity.mult(150000));
         } else if (target.getName().equals("Wanderer")) {
             target.getControl(WandererControl.class).applyGravity(gravity.mult(150000));
+        } else if (target.getName().equals("Laser") || target.getName().equals("Glow")) {
+            target.getControl(ParticleControl.class).applyGravity(gravity.mult(15000), distance);
         }
     }
 

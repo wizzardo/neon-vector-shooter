@@ -81,4 +81,14 @@ public class ParticleControl extends AbstractControl {
         Picture pic = (Picture) spatialNode.getChild("texture");
         pic.getMaterial().setColor("Color", color);
     }
+
+    public void applyGravity(Vector3f gravity, float distance) {
+        Vector3f additionalVelocity = gravity.multLocal(1000f / (distance * distance + 10000f));
+        velocity.addLocal(additionalVelocity);
+
+        if (distance < 400) {
+            additionalVelocity = new Vector3f(gravity.y, -gravity.x, 0).multLocal(3f / (distance + 100));
+            velocity.addLocal(additionalVelocity);
+        }
+    }
 }

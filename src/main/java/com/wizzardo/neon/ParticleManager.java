@@ -32,6 +32,10 @@ public class ParticleManager {
         rand = new Random();
     }
 
+    public Node getParticleNode() {
+        return particleNode;
+    }
+
     public void enemyExplosion(Vector3f position) {
         // init colors
         float hue1 = rand.nextFloat() * 6;
@@ -45,6 +49,7 @@ public class ParticleManager {
 
             Spatial particle = standardParticle.clone();
             particle.setLocalTranslation(position);
+            particle.setUserData("affectedByGravity", true);
             ColorRGBA color = new ColorRGBA();
             color.interpolateLocal(color1, color2, rand.nextFloat() * 0.5f);
             particle.addControl(new ParticleControl(velocity, 3100, color, screenWidth, screenHeight));
@@ -58,6 +63,7 @@ public class ParticleManager {
 
             Spatial particle = standardParticle.clone();
             particle.setLocalTranslation(position);
+            particle.setUserData("affectedByGravity", true);
             ColorRGBA color = new ColorRGBA(0.676f, 0.844f, 0.898f, 1);
             particle.addControl(new ParticleControl(velocity, 1000, color, screenWidth, screenHeight));
             particleNode.attachChild(particle);
@@ -73,6 +79,7 @@ public class ParticleManager {
 
             Spatial particle = standardParticle.clone();
             particle.setLocalTranslation(position);
+            particle.setUserData("affectedByGravity", true);
             ColorRGBA color = new ColorRGBA();
             color.interpolateLocal(color1, color2, rand.nextFloat());
             particle.addControl(new ParticleControl(velocity, 2800, color, screenWidth, screenHeight));
