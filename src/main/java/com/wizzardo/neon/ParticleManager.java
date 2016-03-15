@@ -87,6 +87,15 @@ public class ParticleManager {
         }
     }
 
+    public void sprayParticle(Vector3f position, Vector3f sprayVel) {
+        Spatial particle = standardParticle.clone();
+        particle.setLocalTranslation(position);
+        ColorRGBA color = new ColorRGBA(0.8f, 0.4f, 0.8f, 1f);
+        particle.addControl(new ParticleControl(sprayVel, 3500, color, screenWidth, screenHeight));
+        particle.setUserData("affectedByGravity", true);
+        particleNode.attachChild(particle);
+    }
+
     public ColorRGBA hsvToColor(float h, float s, float v) {
         if (h == 0 && s == 0) {
             return new ColorRGBA(v, v, v, 1);

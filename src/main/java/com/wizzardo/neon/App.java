@@ -285,7 +285,7 @@ public class App extends SimpleApplication {
 
     private void createBlackHole() {
         Spatial blackHole = getSpatial("Black Hole", new EnemyNode("Black Hole"));
-        blackHole.addControl(new BlackHoleControl());
+        blackHole.addControl(new BlackHoleControl(particleManager));
 
         blackHole.setLocalTranslation(getSpawnPosition());
         blackHoleNode.attachChild(blackHole);
