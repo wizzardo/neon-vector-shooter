@@ -13,15 +13,18 @@ import com.jme3.ui.Picture;
  * Created by wizzardo on 14.03.16.
  */
 public class ParticleControl extends AbstractControl {
+    private int screenWidth, screenHeight;
     private Vector3f velocity;
     private float lifespan;
     private long spawnTime;
     private ColorRGBA color;
 
-    public ParticleControl(Vector3f velocity, float lifespan, ColorRGBA color) {
+    public ParticleControl(Vector3f velocity, float lifespan, ColorRGBA color, int screenWidth, int screenHeight) {
         this.velocity = velocity;
         this.lifespan = lifespan;
         this.color = color;
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
         spawnTime = System.currentTimeMillis();
     }
 
@@ -32,6 +35,17 @@ public class ParticleControl extends AbstractControl {
         velocity.multLocal(1 - 3f * tpf);
         if (Math.abs(velocity.x) + Math.abs(velocity.y) < 0.001f) {
             velocity = Vector3f.ZERO;
+        }
+        Vector3f loc = spatial.getLocalTranslation();
+        if (loc.x < 0) {
+            velocity.x = Math.abs(velocity.x);
+        } else if (loc.x > screenWidth) {
+            velocity.x = -Math.abs(velocity.x);
+        }
+        if (loc.z < 0) {
+            velocity.y = Math.abs(velocity.y);
+        } else if (loc.y > screenHeight) {
+            velocity.y = -Math.abs(velocity.y);
         }
         // rotation
         if (velocity != Vector3f.ZERO) {
