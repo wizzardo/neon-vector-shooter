@@ -9,15 +9,17 @@ import com.jme3.scene.control.AbstractControl;
  * Created by wizzardo on 08.03.16.
  */
 public class BulletControl extends AbstractControl {
+    private ParticleManager particleManager;
     private int screenWidth, screenHeight;
     private float speed = 1100f;
     private float rotation;
     public Vector3f direction;
 
-    public BulletControl(Vector3f direction, int screenWidth, int screenHeight) {
+    public BulletControl(Vector3f direction, int screenWidth, int screenHeight, ParticleManager particleManager) {
         this.direction = direction;
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
+        this.particleManager = particleManager;
     }
 
     @Override
@@ -34,10 +36,8 @@ public class BulletControl extends AbstractControl {
 
 //        check boundaries
         Vector3f loc = spatial.getLocalTranslation();
-        if (loc.x > screenWidth ||
-                loc.y > screenHeight ||
-                loc.x < 0 ||
-                loc.y < 0) {
+        if (loc.x > screenWidth || loc.y > screenHeight || loc.x < 0 || loc.y < 0) {
+            particleManager.bulletExplosion(loc);
             spatial.removeFromParent();
         }
     }

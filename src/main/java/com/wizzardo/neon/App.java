@@ -62,7 +62,7 @@ public class App extends SimpleApplication {
         addBloomFilter();
 
         inputManager.setMouseCursor((JmeCursor) assetManager.loadAsset("Textures/Pointer.ico"));
-        particleManager = new ParticleManager(guiNode, getSpatial("Laser"), getSpatial("Glow"));
+        particleManager = new ParticleManager(guiNode, getSpatial("Laser"), getSpatial("Glow"), settings.getWidth(), settings.getHeight());
     }
 
     private void setupHud() {
@@ -195,7 +195,9 @@ public class App extends SimpleApplication {
 
                 //enemies
                 for (int j = 0; j < enemyNode.getQuantity(); j++) {
-                    if (checkCollision((NodeSized) enemyNode.getChild(j), blackHole)) {
+                    EnemyNode enemy = (EnemyNode) enemyNode.getChild(j);
+                    if (checkCollision(enemy, blackHole)) {
+                        particleManager.enemyExplosion(enemy.getLocalTranslation());
                         enemyNode.detachChildAt(j);
                         j--;
                     }
@@ -226,6 +228,7 @@ public class App extends SimpleApplication {
     }
 
     private void killPlayer() {
+        particleManager.playerExplosion(player.getLocalTranslation());
         player.removeFromParent();
         player.getControl().reset();
         player.setAlive(false);
@@ -365,7 +368,7 @@ public class App extends SimpleApplication {
 
     private Spatial createBullet(Vector3f aim) {
         Spatial bullet = getSpatial("Bullet");
-        bullet.addControl(new BulletControl(aim, settings.getWidth(), settings.getHeight()));
+        bullet.addControl(new BulletControl(aim, settings.getWidth(), settings.getHeight(), particleManager));
         return bullet;
     }
 
