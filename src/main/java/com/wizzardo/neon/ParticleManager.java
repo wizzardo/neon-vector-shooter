@@ -11,6 +11,7 @@ import java.util.Random;
  * Created by wizzardo on 14.03.16.
  */
 public class ParticleManager {
+    private int screenWidth, screenHeight;
     private Node guiNode;
     private Spatial standardParticle;
     private Spatial glowParticle;
@@ -18,10 +19,12 @@ public class ParticleManager {
     private Node particleNode;
     private Random rand;
 
-    public ParticleManager(Node guiNode, Spatial standardParticle, Spatial glowParticle) {
+    public ParticleManager(Node guiNode, Spatial standardParticle, Spatial glowParticle, int screenWidth, int screenHeight) {
         this.guiNode = guiNode;
         this.standardParticle = standardParticle;
         this.glowParticle = glowParticle;
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
 
         particleNode = new Node("particles");
         guiNode.attachChild(particleNode);
@@ -44,7 +47,35 @@ public class ParticleManager {
             particle.setLocalTranslation(position);
             ColorRGBA color = new ColorRGBA();
             color.interpolateLocal(color1, color2, rand.nextFloat() * 0.5f);
-            particle.addControl(new ParticleControl(velocity, 3100, color));
+            particle.addControl(new ParticleControl(velocity, 3100, color, screenWidth, screenHeight));
+            particleNode.attachChild(particle);
+        }
+    }
+
+    public void bulletExplosion(Vector3f position) {
+        for (int i = 0; i < 30; i++) {
+            Vector3f velocity = getRandomVelocity(175);
+
+            Spatial particle = standardParticle.clone();
+            particle.setLocalTranslation(position);
+            ColorRGBA color = new ColorRGBA(0.676f, 0.844f, 0.898f, 1);
+            particle.addControl(new ParticleControl(velocity, 1000, color, screenWidth, screenHeight));
+            particleNode.attachChild(particle);
+        }
+    }
+
+    public void playerExplosion(Vector3f position) {
+        ColorRGBA color1 = ColorRGBA.White;
+        ColorRGBA color2 = ColorRGBA.Yellow;
+
+        for (int i = 0; i < 1200; i++) {
+            Vector3f velocity = getRandomVelocity(1000);
+
+            Spatial particle = standardParticle.clone();
+            particle.setLocalTranslation(position);
+            ColorRGBA color = new ColorRGBA();
+            color.interpolateLocal(color1, color2, rand.nextFloat());
+            particle.addControl(new ParticleControl(velocity, 2800, color, screenWidth, screenHeight));
             particleNode.attachChild(particle);
         }
     }
