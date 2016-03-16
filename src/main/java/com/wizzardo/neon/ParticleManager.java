@@ -1,6 +1,7 @@
 package com.wizzardo.neon;
 
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -83,6 +84,25 @@ public class ParticleManager {
             ColorRGBA color = new ColorRGBA();
             color.interpolateLocal(color1, color2, rand.nextFloat());
             particle.addControl(new ParticleControl(velocity, 2800, color, screenWidth, screenHeight));
+            particleNode.attachChild(particle);
+        }
+    }
+
+    public void blackHoleExplosion(Vector3f position, long spawnTime) {
+        float hue = ((System.currentTimeMillis() - spawnTime) * 0.003f) % 6f;
+        int numParticles = 150;
+        ColorRGBA color = hsvToColor(hue, 0.25f, 1);
+        float startOffset = rand.nextFloat() * FastMath.PI * 2 / numParticles;
+
+        for (int i = 0; i < numParticles; i++) {
+            float alpha = FastMath.PI * 2 * i / numParticles + startOffset;
+            Vector3f velocity = App.getVectorFromAngle(alpha).multLocal(rand.nextFloat() * 200 + 300);
+            Vector3f pos = position.add(velocity.mult(0.1f));
+
+            Spatial particle = standardParticle.clone();
+            particle.setLocalTranslation(pos);
+            particle.addControl(new ParticleControl(velocity, 1000, color, screenWidth, screenHeight));
+            particle.setUserData("affectedByGravity", false);
             particleNode.attachChild(particle);
         }
     }

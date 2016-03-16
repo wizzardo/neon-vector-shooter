@@ -39,13 +39,15 @@ public class EnemyControl extends AbstractControl {
         }
     }
 
-    protected void onUpdate(float tpf) {
+    public long getSpawnTime() {
+        return spawnTime;
+    }
 
+    protected void onUpdate(float tpf) {
     }
 
     @Override
     protected void controlRender(RenderManager renderManager, ViewPort viewPort) {
-
     }
 
     public boolean isActive() {

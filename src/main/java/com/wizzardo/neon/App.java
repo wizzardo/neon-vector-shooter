@@ -222,6 +222,7 @@ public class App extends SimpleApplication {
                         BlackHoleControl control = (BlackHoleControl) blackHole.getControl();
                         control.wasShot();
                         if (control.isDead()) {
+                            particleManager.blackHoleExplosion(blackHole.getLocalTranslation(), control.getSpawnTime());
                             blackHoleNode.detachChild(blackHole);
                             soundManager.explosion();
                             break;
