@@ -15,13 +15,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ParticleManager {
     private int screenWidth, screenHeight;
     private Node guiNode;
-    private Spatial standardParticle;
-    private Spatial glowParticle;
+    private Particle standardParticle;
+    private Particle glowParticle;
 
     private Node particleNode;
     private Random rand;
 
-    public ParticleManager(Node guiNode, Spatial standardParticle, Spatial glowParticle, int screenWidth, int screenHeight) {
+    public ParticleManager(Node guiNode, Particle standardParticle, Particle glowParticle, int screenWidth, int screenHeight) {
         this.guiNode = guiNode;
         this.standardParticle = standardParticle;
         this.glowParticle = glowParticle;
@@ -49,9 +49,9 @@ public class ParticleManager {
         for (int i = 0; i < 120; i++) {
             Vector3f velocity = getRandomVelocity(250);
 
-            Spatial particle = standardParticle.clone();
+            Particle particle = standardParticle.clone();
             particle.setLocalTranslation(position);
-            particle.setUserData("affectedByGravity", true);
+            particle.setAffectedByGravity(true);
             ColorRGBA color = new ColorRGBA();
             color.interpolateLocal(color1, color2, rand.nextFloat() * 0.5f);
             particle.addControl(new ParticleControl(velocity, 3100, color, screenWidth, screenHeight));
@@ -63,9 +63,9 @@ public class ParticleManager {
         for (int i = 0; i < 30; i++) {
             Vector3f velocity = getRandomVelocity(175);
 
-            Spatial particle = standardParticle.clone();
+            Particle particle = standardParticle.clone();
             particle.setLocalTranslation(position);
-            particle.setUserData("affectedByGravity", true);
+            particle.setAffectedByGravity(true);
             ColorRGBA color = new ColorRGBA(0.676f, 0.844f, 0.898f, 1);
             particle.addControl(new ParticleControl(velocity, 1000, color, screenWidth, screenHeight));
             particleNode.attachChild(particle);
@@ -79,9 +79,9 @@ public class ParticleManager {
         for (int i = 0; i < 1200; i++) {
             Vector3f velocity = getRandomVelocity(1000);
 
-            Spatial particle = standardParticle.clone();
+            Particle particle = standardParticle.clone();
             particle.setLocalTranslation(position);
-            particle.setUserData("affectedByGravity", true);
+            particle.setAffectedByGravity(true);
             ColorRGBA color = new ColorRGBA();
             color.interpolateLocal(color1, color2, rand.nextFloat());
             particle.addControl(new ParticleControl(velocity, 2800, color, screenWidth, screenHeight));
@@ -100,20 +100,20 @@ public class ParticleManager {
             Vector3f velocity = App.getVectorFromAngle(alpha).multLocal(rand.nextFloat() * 200 + 300);
             Vector3f pos = position.add(velocity.mult(0.1f));
 
-            Spatial particle = standardParticle.clone();
+            Particle particle = standardParticle.clone();
             particle.setLocalTranslation(pos);
             particle.addControl(new ParticleControl(velocity, 1000, color, screenWidth, screenHeight));
-            particle.setUserData("affectedByGravity", false);
+            particle.setAffectedByGravity(false);
             particleNode.attachChild(particle);
         }
     }
 
     public void sprayParticle(Vector3f position, Vector3f sprayVel) {
-        Spatial particle = standardParticle.clone();
+        Particle particle = standardParticle.clone();
         particle.setLocalTranslation(position);
         ColorRGBA color = new ColorRGBA(0.8f, 0.4f, 0.8f, 1f);
         particle.addControl(new ParticleControl(sprayVel, 3500, color, screenWidth, screenHeight));
-        particle.setUserData("affectedByGravity", true);
+        particle.setAffectedByGravity(true);
         particleNode.attachChild(particle);
     }
 
@@ -133,17 +133,17 @@ public class ParticleManager {
         Random random = ThreadLocalRandom.current();
         Vector3f randVec = App.getVectorFromAngle(random.nextFloat() * FastMath.PI * 2);
         Vector3f velMid = baseVel.add(randVec.mult(7.5f));
-        Spatial particleMid = standardParticle.clone();
+        Particle particleMid = standardParticle.clone();
         particleMid.setLocalTranslation(pos);
         particleMid.addControl(new ParticleControl(velMid, 800, midColor, screenWidth, screenHeight));
-        particleMid.setUserData("affectedByGravity", true);
-        ((Node) guiNode.getChild("particles")).attachChild(particleMid);
+        particleMid.setAffectedByGravity(true);
+        particleNode.attachChild(particleMid);
 
-        Spatial particleMidGlow = glowParticle.clone();
+        Particle particleMidGlow = glowParticle.clone();
         particleMidGlow.setLocalTranslation(pos);
         particleMidGlow.addControl(new ParticleControl(velMid, 800, midColor, screenWidth, screenHeight));
-        particleMidGlow.setUserData("affectedByGravity", true);
-        ((Node) guiNode.getChild("particles")).attachChild(particleMidGlow);
+        particleMidGlow.setAffectedByGravity(true);
+        particleNode.attachChild(particleMidGlow);
 
         //side streams
         Vector3f randVec1 = App.getVectorFromAngle(random.nextFloat() * FastMath.PI * 2);
@@ -151,29 +151,29 @@ public class ParticleManager {
         Vector3f velSide1 = baseVel.add(randVec1.mult(2.4f)).addLocal(perpVel);
         Vector3f velSide2 = baseVel.add(randVec2.mult(2.4f)).subtractLocal(perpVel);
 
-        Spatial particleSide1 = standardParticle.clone();
+        Particle particleSide1 = standardParticle.clone();
         particleSide1.setLocalTranslation(pos);
         particleSide1.addControl(new ParticleControl(velSide1, 800, sideColor, screenWidth, screenHeight));
-        particleSide1.setUserData("affectedByGravity", true);
-        ((Node) guiNode.getChild("particles")).attachChild(particleSide1);
+        particleSide1.setAffectedByGravity(true);
+        particleNode.attachChild(particleSide1);
 
-        Spatial particleSide2 = standardParticle.clone();
+        Particle particleSide2 = standardParticle.clone();
         particleSide2.setLocalTranslation(pos);
         particleSide2.addControl(new ParticleControl(velSide2, 800, sideColor, screenWidth, screenHeight));
-        particleSide2.setUserData("affectedByGravity", true);
-        ((Node) guiNode.getChild("particles")).attachChild(particleSide2);
+        particleSide2.setAffectedByGravity(true);
+        particleNode.attachChild(particleSide2);
 
-        Spatial particleSide1Glow = glowParticle.clone();
+        Particle particleSide1Glow = glowParticle.clone();
         particleSide1Glow.setLocalTranslation(pos);
         particleSide1Glow.addControl(new ParticleControl(velSide1, 800, sideColor, screenWidth, screenHeight));
-        particleSide1Glow.setUserData("affectedByGravity", true);
-        ((Node) guiNode.getChild("particles")).attachChild(particleSide1Glow);
+        particleSide1Glow.setAffectedByGravity(true);
+        particleNode.attachChild(particleSide1Glow);
 
-        Spatial particleSide2Glow = glowParticle.clone();
+        Particle particleSide2Glow = glowParticle.clone();
         particleSide2Glow.setLocalTranslation(pos);
         particleSide2Glow.addControl(new ParticleControl(velSide2, 800, sideColor, screenWidth, screenHeight));
-        particleSide2Glow.setUserData("affectedByGravity", true);
-        ((Node) guiNode.getChild("particles")).attachChild(particleSide2Glow);
+        particleSide2Glow.setAffectedByGravity(true);
+        particleNode.attachChild(particleSide2Glow);
     }
 
     public ColorRGBA hsvToColor(float h, float s, float v) {

@@ -51,7 +51,7 @@ public class App extends SimpleApplication {
 ////        turn off stats view (you can leave it on, if you want)
 //        setDisplayStatView(false);
 //        setDisplayFps(false);
-        particleManager = new ParticleManager(guiNode, getSpatial("Laser"), getSpatial("Glow"), settings.getWidth(), settings.getHeight());
+        particleManager = new ParticleManager(guiNode, getSpatial("Laser", new Particle("Laser")), getSpatial("Glow", new Particle("Glow")), settings.getWidth(), settings.getHeight());
         setupPlayer();
 
         setupUserInput();
@@ -134,8 +134,8 @@ public class App extends SimpleApplication {
             // check Particles
             Node particleNode = particleManager.getParticleNode();
             for (int j = 0; j < particleNode.getQuantity(); j++) {
-                Spatial particle = particleNode.getChild(j);
-                if (particle.getUserData("affectedByGravity")) {
+                Particle particle = (Particle) particleNode.getChild(j);
+                if (particle.isAffectedByGravity()) {
                     applyGravity(blackHoleNode.getChild(i), particle, tpf);
                 }
             }
@@ -174,7 +174,7 @@ public class App extends SimpleApplication {
         for (int i = 0; i < enemyNode.getQuantity(); i++) {
             if (((EnemyNode) enemyNode.getChild(i)).getControl().isActive()) {
                 if (checkCollision(player, (NodeSized) enemyNode.getChild(i))) {
-                    killPlayer();
+//                    killPlayer();
                 }
             }
         }

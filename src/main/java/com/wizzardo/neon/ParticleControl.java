@@ -56,10 +56,10 @@ public class ParticleControl extends AbstractControl {
         float speed = velocity.length();
         long difTime = System.currentTimeMillis() - spawnTime;
         float percentLife = 1 - difTime / lifespan;
-        float alpha = lesserValue(1.5f, lesserValue(percentLife * 2, speed));
+        float alpha = min(1.5f, min(percentLife * 2, speed));
         alpha *= alpha;
         setAlpha(alpha);
-        spatial.setLocalScale(0.3f + lesserValue(lesserValue(1.5f, 0.02f * speed + 0.1f), alpha));
+        spatial.setLocalScale(0.3f + min(min(1.5f, 0.02f * speed + 0.1f), alpha));
         spatial.scale(0.65f);
         // is particle expired?
         if (difTime > lifespan) {
@@ -71,7 +71,7 @@ public class ParticleControl extends AbstractControl {
     protected void controlRender(RenderManager rm, ViewPort vp) {
     }
 
-    private float lesserValue(float a, float b) {
+    private float min(float a, float b) {
         return a < b ? a : b;
     }
 
@@ -87,7 +87,7 @@ public class ParticleControl extends AbstractControl {
         velocity.addLocal(additionalVelocity);
 
         if (distance < 400) {
-            additionalVelocity = new Vector3f(gravity.y, -gravity.x, 0).multLocal(3f / (distance + 100));
+            additionalVelocity.set(gravity.y, -gravity.x, 0).multLocal(3f / (distance + 100));
             velocity.addLocal(additionalVelocity);
         }
     }
