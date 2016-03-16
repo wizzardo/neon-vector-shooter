@@ -7,6 +7,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by wizzardo on 14.03.16.
@@ -114,6 +115,65 @@ public class ParticleManager {
         particle.addControl(new ParticleControl(sprayVel, 3500, color, screenWidth, screenHeight));
         particle.setUserData("affectedByGravity", true);
         particleNode.attachChild(particle);
+    }
+
+    public void makeExhaustFire(Vector3f position, float rotation, long spawnTime) {
+        ColorRGBA midColor = new ColorRGBA(1f, 0.73f, 0.12f, 0.7f);
+        ColorRGBA sideColor = new ColorRGBA(0.78f, 0.15f, 0.04f, 0.7f);
+
+        Vector3f direction = App.getVectorFromAngle(rotation);
+
+        float t = (System.currentTimeMillis() - spawnTime) / 1000f;
+        Vector3f baseVel = direction.mult(-45f);
+        Vector3f perpVel = new Vector3f(baseVel.y, -baseVel.x, 0).multLocal(2f * FastMath.sin(t * 10f));
+
+        Vector3f pos = position.add(App.getVectorFromAngle(rotation).multLocal(-25f));
+
+        //middle stream
+        Random random = ThreadLocalRandom.current();
+        Vector3f randVec = App.getVectorFromAngle(random.nextFloat() * FastMath.PI * 2);
+        Vector3f velMid = baseVel.add(randVec.mult(7.5f));
+        Spatial particleMid = standardParticle.clone();
+        particleMid.setLocalTranslation(pos);
+        particleMid.addControl(new ParticleControl(velMid, 800, midColor, screenWidth, screenHeight));
+        particleMid.setUserData("affectedByGravity", true);
+        ((Node) guiNode.getChild("particles")).attachChild(particleMid);
+
+        Spatial particleMidGlow = glowParticle.clone();
+        particleMidGlow.setLocalTranslation(pos);
+        particleMidGlow.addControl(new ParticleControl(velMid, 800, midColor, screenWidth, screenHeight));
+        particleMidGlow.setUserData("affectedByGravity", true);
+        ((Node) guiNode.getChild("particles")).attachChild(particleMidGlow);
+
+        //side streams
+        Vector3f randVec1 = App.getVectorFromAngle(random.nextFloat() * FastMath.PI * 2);
+        Vector3f randVec2 = App.getVectorFromAngle(random.nextFloat() * FastMath.PI * 2);
+        Vector3f velSide1 = baseVel.add(randVec1.mult(2.4f)).addLocal(perpVel);
+        Vector3f velSide2 = baseVel.add(randVec2.mult(2.4f)).subtractLocal(perpVel);
+
+        Spatial particleSide1 = standardParticle.clone();
+        particleSide1.setLocalTranslation(pos);
+        particleSide1.addControl(new ParticleControl(velSide1, 800, sideColor, screenWidth, screenHeight));
+        particleSide1.setUserData("affectedByGravity", true);
+        ((Node) guiNode.getChild("particles")).attachChild(particleSide1);
+
+        Spatial particleSide2 = standardParticle.clone();
+        particleSide2.setLocalTranslation(pos);
+        particleSide2.addControl(new ParticleControl(velSide2, 800, sideColor, screenWidth, screenHeight));
+        particleSide2.setUserData("affectedByGravity", true);
+        ((Node) guiNode.getChild("particles")).attachChild(particleSide2);
+
+        Spatial particleSide1Glow = glowParticle.clone();
+        particleSide1Glow.setLocalTranslation(pos);
+        particleSide1Glow.addControl(new ParticleControl(velSide1, 800, sideColor, screenWidth, screenHeight));
+        particleSide1Glow.setUserData("affectedByGravity", true);
+        ((Node) guiNode.getChild("particles")).attachChild(particleSide1Glow);
+
+        Spatial particleSide2Glow = glowParticle.clone();
+        particleSide2Glow.setLocalTranslation(pos);
+        particleSide2Glow.addControl(new ParticleControl(velSide2, 800, sideColor, screenWidth, screenHeight));
+        particleSide2Glow.setUserData("affectedByGravity", true);
+        ((Node) guiNode.getChild("particles")).attachChild(particleSide2Glow);
     }
 
     public ColorRGBA hsvToColor(float h, float s, float v) {

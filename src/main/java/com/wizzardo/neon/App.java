@@ -51,6 +51,7 @@ public class App extends SimpleApplication {
 ////        turn off stats view (you can leave it on, if you want)
 //        setDisplayStatView(false);
 //        setDisplayFps(false);
+        particleManager = new ParticleManager(guiNode, getSpatial("Laser"), getSpatial("Glow"), settings.getWidth(), settings.getHeight());
         setupPlayer();
 
         setupUserInput();
@@ -62,7 +63,6 @@ public class App extends SimpleApplication {
         addBloomFilter();
 
         inputManager.setMouseCursor((JmeCursor) assetManager.loadAsset("Textures/Pointer.ico"));
-        particleManager = new ParticleManager(guiNode, getSpatial("Laser"), getSpatial("Glow"), settings.getWidth(), settings.getHeight());
     }
 
     private void setupHud() {
@@ -395,7 +395,7 @@ public class App extends SimpleApplication {
         //        setup the player
         player = getSpatial("Player", new PlayerNode("Player"));
         player.move(settings.getWidth() / 2, settings.getHeight() / 2, 0);
-        player.addControl(new PlayerControl(settings.getWidth(), settings.getHeight()));
+        player.addControl(new PlayerControl(settings.getWidth(), settings.getHeight(), particleManager));
         guiNode.attachChild(player);
     }
 

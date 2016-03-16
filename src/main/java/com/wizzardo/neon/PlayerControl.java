@@ -16,11 +16,16 @@ public class PlayerControl extends AbstractControl {
     private float speed = 800f;
     private float lastRotation;
     private PlayerNode player;
+    private ParticleManager particleManager;
+    private long spawnTime;
     public boolean up, down, left, right;
 
-    public PlayerControl(int width, int height) {
+
+    public PlayerControl(int width, int height, ParticleManager particleManager) {
         this.screenWidth = width;
         this.screenHeight = height;
+        this.particleManager = particleManager;
+        spawnTime = System.currentTimeMillis();
     }
 
     @Override
@@ -58,6 +63,9 @@ public class PlayerControl extends AbstractControl {
             }
             player.rotate(0, 0, -lastRotation + 0);
             lastRotation = 0;
+        }
+        if (up || down || left || right) {
+            particleManager.makeExhaustFire(spatial.getLocalTranslation(), lastRotation, spawnTime);
         }
     }
 
