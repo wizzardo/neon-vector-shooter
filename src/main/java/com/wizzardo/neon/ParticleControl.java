@@ -6,6 +6,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import com.jme3.ui.Picture;
 
@@ -15,6 +16,7 @@ import com.jme3.ui.Picture;
 public class ParticleControl extends AbstractControl {
     private int screenWidth, screenHeight;
     private Vector3f velocity;
+    private Vector3f direction;
     private float lifespan;
     private long spawnTime;
     private ColorRGBA color;
@@ -26,15 +28,18 @@ public class ParticleControl extends AbstractControl {
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         spawnTime = System.currentTimeMillis();
+        direction = new Vector3f();
     }
 
     @Override
     protected void controlUpdate(float tpf) {
         // movement
+        Spatial spatial = this.spatial;
+        Vector3f velocity = this.velocity;
         spatial.move(velocity.mult(tpf * 3f));
         velocity.multLocal(1 - 3f * tpf);
         if (Math.abs(velocity.x) + Math.abs(velocity.y) < 0.001f) {
-            velocity = Vector3f.ZERO;
+            this.velocity = velocity = Vector3f.ZERO;
         }
         Vector3f loc = spatial.getLocalTranslation();
         if (loc.x < 0) {
@@ -49,7 +54,7 @@ public class ParticleControl extends AbstractControl {
         }
         // rotation
         if (velocity != Vector3f.ZERO) {
-            spatial.rotateUpTo(velocity.normalize());
+            spatial.rotateUpTo(direction.set(velocity).normalizeLocal());
             spatial.rotate(0, 0, FastMath.PI / 2f);
         }
         // scaling and alpha
