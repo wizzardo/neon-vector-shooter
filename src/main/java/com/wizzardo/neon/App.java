@@ -134,9 +134,12 @@ public class App extends SimpleApplication {
             // check Particles
             Node particleNode = particleManager.getParticleNode();
             for (int j = 0; j < particleNode.getQuantity(); j++) {
-                Particle particle = (Particle) particleNode.getChild(j);
-                if (particle.isAffectedByGravity()) {
-                    applyGravity(blackHoleNode.getChild(i), particle, tpf);
+                Node parent = (Node) particleNode.getChild(j);
+                for (int k = 0; k < parent.getQuantity(); k++) {
+                    Particle particle = (Particle) parent.getChild(k);
+                    if (particle.isAffectedByGravity()) {
+                        applyGravity(blackHoleNode.getChild(i), particle, tpf);
+                    }
                 }
             }
         }
@@ -174,7 +177,7 @@ public class App extends SimpleApplication {
         for (int i = 0; i < enemyNode.getQuantity(); i++) {
             if (((EnemyNode) enemyNode.getChild(i)).getControl().isActive()) {
                 if (checkCollision(player, (NodeSized) enemyNode.getChild(i))) {
-//                    killPlayer();
+                    killPlayer();
                 }
             }
         }

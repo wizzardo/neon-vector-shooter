@@ -3,8 +3,11 @@ package com.wizzardo.neon;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.RenderManager;
+import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.control.AbstractControl;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -20,6 +23,28 @@ public class ParticleManager {
 
     private Node particleNode;
     private Random rand;
+
+    private static class ParticleManagerControl extends AbstractControl {
+        private long spawnTime = System.currentTimeMillis();
+        private long lifespan;
+
+        ParticleManagerControl(long lifespan) {
+            this.lifespan = lifespan;
+        }
+
+        @Override
+        protected void controlUpdate(float tpf) {
+            long difTime = System.currentTimeMillis() - spawnTime;
+            // is particle expired?
+            if (difTime > lifespan) {
+                spatial.removeFromParent();
+            }
+        }
+
+        @Override
+        protected void controlRender(RenderManager rm, ViewPort vp) {
+        }
+    }
 
     public ParticleManager(Node guiNode, Particle standardParticle, Particle glowParticle, int screenWidth, int screenHeight) {
         this.guiNode = guiNode;
@@ -45,6 +70,7 @@ public class ParticleManager {
         ColorRGBA color1 = hsvToColor(hue1, 0.5f, 1f);
         ColorRGBA color2 = hsvToColor(hue2, 0.5f, 1f);
 
+        Node parent = new Node();
         // create 120 particles
         for (int i = 0; i < 120; i++) {
             Vector3f velocity = getRandomVelocity(250);
@@ -55,11 +81,14 @@ public class ParticleManager {
             ColorRGBA color = new ColorRGBA();
             color.interpolateLocal(color1, color2, rand.nextFloat() * 0.5f);
             particle.addControl(new ParticleControl(velocity, 3100, color, screenWidth, screenHeight));
-            particleNode.attachChild(particle);
+            parent.attachChild(particle);
         }
+        parent.addControl(new ParticleManagerControl(3100));
+        particleNode.attachChild(parent);
     }
 
     public void bulletExplosion(Vector3f position) {
+        Node parent = new Node();
         for (int i = 0; i < 30; i++) {
             Vector3f velocity = getRandomVelocity(175);
 
@@ -68,14 +97,17 @@ public class ParticleManager {
             particle.setAffectedByGravity(true);
             ColorRGBA color = new ColorRGBA(0.676f, 0.844f, 0.898f, 1);
             particle.addControl(new ParticleControl(velocity, 1000, color, screenWidth, screenHeight));
-            particleNode.attachChild(particle);
+            parent.attachChild(particle);
         }
+        parent.addControl(new ParticleManagerControl(1000));
+        particleNode.attachChild(parent);
     }
 
     public void playerExplosion(Vector3f position) {
         ColorRGBA color1 = ColorRGBA.White;
         ColorRGBA color2 = ColorRGBA.Yellow;
 
+        Node parent = new Node();
         for (int i = 0; i < 1200; i++) {
             Vector3f velocity = getRandomVelocity(1000);
 
@@ -85,8 +117,10 @@ public class ParticleManager {
             ColorRGBA color = new ColorRGBA();
             color.interpolateLocal(color1, color2, rand.nextFloat());
             particle.addControl(new ParticleControl(velocity, 2800, color, screenWidth, screenHeight));
-            particleNode.attachChild(particle);
+            parent.attachChild(particle);
         }
+        parent.addControl(new ParticleManagerControl(2800));
+        particleNode.attachChild(parent);
     }
 
     public void blackHoleExplosion(Vector3f position, long spawnTime) {
@@ -95,6 +129,7 @@ public class ParticleManager {
         ColorRGBA color = hsvToColor(hue, 0.25f, 1);
         float startOffset = rand.nextFloat() * FastMath.PI * 2 / numParticles;
 
+        Node parent = new Node();
         for (int i = 0; i < numParticles; i++) {
             float alpha = FastMath.PI * 2 * i / numParticles + startOffset;
             Vector3f velocity = App.getVectorFromAngle(alpha).multLocal(rand.nextFloat() * 200 + 300);
@@ -104,17 +139,23 @@ public class ParticleManager {
             particle.setLocalTranslation(pos);
             particle.addControl(new ParticleControl(velocity, 1000, color, screenWidth, screenHeight));
             particle.setAffectedByGravity(false);
-            particleNode.attachChild(particle);
+            parent.attachChild(particle);
         }
+        parent.addControl(new ParticleManagerControl(1000));
+        particleNode.attachChild(parent);
     }
 
     public void sprayParticle(Vector3f position, Vector3f sprayVel) {
+        Node parent = new Node();
         Particle particle = standardParticle.clone();
         particle.setLocalTranslation(position);
         ColorRGBA color = new ColorRGBA(0.8f, 0.4f, 0.8f, 1f);
         particle.addControl(new ParticleControl(sprayVel, 3500, color, screenWidth, screenHeight));
         particle.setAffectedByGravity(true);
-        particleNode.attachChild(particle);
+        parent.attachChild(particle);
+
+        parent.addControl(new ParticleManagerControl(3500));
+        particleNode.attachChild(parent);
     }
 
     public void makeExhaustFire(Vector3f position, float rotation, long spawnTime) {
@@ -129,21 +170,24 @@ public class ParticleManager {
 
         Vector3f pos = position.add(App.getVectorFromAngle(rotation).multLocal(-25f));
 
+        Node parent = new Node();
+        int lifespan = 800;
+
         //middle stream
         Random random = ThreadLocalRandom.current();
         Vector3f randVec = App.getVectorFromAngle(random.nextFloat() * FastMath.PI * 2);
         Vector3f velMid = baseVel.add(randVec.mult(7.5f));
         Particle particleMid = standardParticle.clone();
         particleMid.setLocalTranslation(pos);
-        particleMid.addControl(new ParticleControl(velMid, 800, midColor, screenWidth, screenHeight));
+        particleMid.addControl(new ParticleControl(velMid, lifespan, midColor, screenWidth, screenHeight));
         particleMid.setAffectedByGravity(true);
-        particleNode.attachChild(particleMid);
+        parent.attachChild(particleMid);
 
         Particle particleMidGlow = glowParticle.clone();
         particleMidGlow.setLocalTranslation(pos);
-        particleMidGlow.addControl(new ParticleControl(velMid, 800, midColor, screenWidth, screenHeight));
+        particleMidGlow.addControl(new ParticleControl(velMid, lifespan, midColor, screenWidth, screenHeight));
         particleMidGlow.setAffectedByGravity(true);
-        particleNode.attachChild(particleMidGlow);
+        parent.attachChild(particleMidGlow);
 
         //side streams
         Vector3f randVec1 = App.getVectorFromAngle(random.nextFloat() * FastMath.PI * 2);
@@ -153,27 +197,30 @@ public class ParticleManager {
 
         Particle particleSide1 = standardParticle.clone();
         particleSide1.setLocalTranslation(pos);
-        particleSide1.addControl(new ParticleControl(velSide1, 800, sideColor, screenWidth, screenHeight));
+        particleSide1.addControl(new ParticleControl(velSide1, lifespan, sideColor, screenWidth, screenHeight));
         particleSide1.setAffectedByGravity(true);
-        particleNode.attachChild(particleSide1);
+        parent.attachChild(particleSide1);
 
         Particle particleSide2 = standardParticle.clone();
         particleSide2.setLocalTranslation(pos);
-        particleSide2.addControl(new ParticleControl(velSide2, 800, sideColor, screenWidth, screenHeight));
+        particleSide2.addControl(new ParticleControl(velSide2, lifespan, sideColor, screenWidth, screenHeight));
         particleSide2.setAffectedByGravity(true);
-        particleNode.attachChild(particleSide2);
+        parent.attachChild(particleSide2);
 
         Particle particleSide1Glow = glowParticle.clone();
         particleSide1Glow.setLocalTranslation(pos);
-        particleSide1Glow.addControl(new ParticleControl(velSide1, 800, sideColor, screenWidth, screenHeight));
+        particleSide1Glow.addControl(new ParticleControl(velSide1, lifespan, sideColor, screenWidth, screenHeight));
         particleSide1Glow.setAffectedByGravity(true);
-        particleNode.attachChild(particleSide1Glow);
+        parent.attachChild(particleSide1Glow);
 
         Particle particleSide2Glow = glowParticle.clone();
         particleSide2Glow.setLocalTranslation(pos);
-        particleSide2Glow.addControl(new ParticleControl(velSide2, 800, sideColor, screenWidth, screenHeight));
+        particleSide2Glow.addControl(new ParticleControl(velSide2, lifespan, sideColor, screenWidth, screenHeight));
         particleSide2Glow.setAffectedByGravity(true);
-        particleNode.attachChild(particleSide2Glow);
+        parent.attachChild(particleSide2Glow);
+
+        parent.addControl(new ParticleManagerControl(lifespan));
+        particleNode.attachChild(parent);
     }
 
     public ColorRGBA hsvToColor(float h, float s, float v) {

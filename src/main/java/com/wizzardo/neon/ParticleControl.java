@@ -61,10 +61,6 @@ public class ParticleControl extends AbstractControl {
         setAlpha(alpha);
         spatial.setLocalScale(0.3f + min(min(1.5f, 0.02f * speed + 0.1f), alpha));
         spatial.scale(0.65f);
-        // is particle expired?
-        if (difTime > lifespan) {
-            spatial.removeFromParent();
-        }
     }
 
     @Override
