@@ -6,8 +6,9 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
+import com.wizzardo.neon.nodes.Particle;
+import com.wizzardo.neon.nodes.ParticleControl;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;

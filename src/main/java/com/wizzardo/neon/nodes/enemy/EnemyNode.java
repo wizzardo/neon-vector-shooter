@@ -1,7 +1,7 @@
-package com.wizzardo.neon.enemy;
+package com.wizzardo.neon.nodes.enemy;
 
 import com.jme3.scene.control.Control;
-import com.wizzardo.neon.NodeSized;
+import com.wizzardo.neon.nodes.NodeSized;
 
 /**
  * Created by wizzardo on 12.03.16.

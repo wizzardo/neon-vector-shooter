@@ -19,10 +19,8 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
-import com.wizzardo.neon.enemy.BlackHoleControl;
-import com.wizzardo.neon.enemy.EnemyNode;
-import com.wizzardo.neon.enemy.SeekerControl;
-import com.wizzardo.neon.enemy.WandererControl;
+import com.wizzardo.neon.nodes.enemy.*;
+import com.wizzardo.neon.nodes.*;
 
 import java.util.concurrent.ThreadLocalRandom;
 

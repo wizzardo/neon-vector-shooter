@@ -1,4 +1,4 @@
-package com.wizzardo.neon;
+package com.wizzardo.neon.nodes;
 
 import com.jme3.scene.control.Control;
 

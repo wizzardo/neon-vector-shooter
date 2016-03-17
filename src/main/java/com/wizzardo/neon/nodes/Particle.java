@@ -1,6 +1,4 @@
-package com.wizzardo.neon;
-
-import com.jme3.scene.Spatial;
+package com.wizzardo.neon.nodes;
 
 /**
  * Created by wizzardo on 16.03.16.

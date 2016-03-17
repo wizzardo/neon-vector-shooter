@@ -1,4 +1,4 @@
-package com.wizzardo.neon.enemy;
+package com.wizzardo.neon.nodes.enemy;
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;

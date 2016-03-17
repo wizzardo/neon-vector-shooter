@@ -1,9 +1,11 @@
-package com.wizzardo.neon;
+package com.wizzardo.neon.nodes;
 
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.control.AbstractControl;
+import com.wizzardo.neon.App;
+import com.wizzardo.neon.ParticleManager;
 
 /**
  * Created by wizzardo on 08.03.16.
