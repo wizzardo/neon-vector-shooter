@@ -18,11 +18,10 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class ParticleManager {
     private int screenWidth, screenHeight;
-    private Node guiNode;
     private ParticleNode standardParticle;
     private ParticleNode glowParticle;
 
-    private Node particleNode;
+    private GNode<GNode<ParticleNode>> particleNode;
     private Random rand;
 
     private static class ParticleManagerControl extends AbstractControl {
@@ -48,19 +47,18 @@ public class ParticleManager {
     }
 
     public ParticleManager(Node guiNode, ParticleNode standardParticle, ParticleNode glowParticle, int screenWidth, int screenHeight) {
-        this.guiNode = guiNode;
         this.standardParticle = standardParticle;
         this.glowParticle = glowParticle;
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
 
-        particleNode = new Node("particles");
+        particleNode = new GNode<>("particles", new GNode<>(ParticleNode.class, 0), 32);
         guiNode.attachChild(particleNode);
 
         rand = new Random();
     }
 
-    public Node getParticleNode() {
+    public GNode<GNode<ParticleNode>> getParticleNode() {
         return particleNode;
     }
 
@@ -71,9 +69,10 @@ public class ParticleManager {
         ColorRGBA color1 = hsvToColor(hue1, 0.5f, 1f);
         ColorRGBA color2 = hsvToColor(hue2, 0.5f, 1f);
 
-        Node parent = new Node();
+        int count = 120;
+        Node parent = new GNode<>(ParticleNode.class, count);
         // create 120 particles
-        for (int i = 0; i < 120; i++) {
+        for (int i = 0; i < count; i++) {
             Vector3f velocity = getRandomVelocity(250);
 
             ParticleNode particle = standardParticle.clone();
@@ -89,8 +88,9 @@ public class ParticleManager {
     }
 
     public void bulletExplosion(Vector3f position) {
-        Node parent = new Node();
-        for (int i = 0; i < 30; i++) {
+        int count = 30;
+        Node parent = new GNode<>(ParticleNode.class, count);
+        for (int i = 0; i < count; i++) {
             Vector3f velocity = getRandomVelocity(175);
 
             ParticleNode particle = standardParticle.clone();
@@ -108,8 +108,9 @@ public class ParticleManager {
         ColorRGBA color1 = ColorRGBA.White;
         ColorRGBA color2 = ColorRGBA.Yellow;
 
-        Node parent = new Node();
-        for (int i = 0; i < 1200; i++) {
+        int count = 1200;
+        Node parent = new GNode<>(ParticleNode.class, count);
+        for (int i = 0; i < count; i++) {
             Vector3f velocity = getRandomVelocity(1000);
 
             ParticleNode particle = standardParticle.clone();
@@ -130,7 +131,7 @@ public class ParticleManager {
         ColorRGBA color = hsvToColor(hue, 0.25f, 1);
         float startOffset = rand.nextFloat() * FastMath.PI * 2 / numParticles;
 
-        Node parent = new Node();
+        Node parent = new GNode<>(ParticleNode.class, numParticles);
         for (int i = 0; i < numParticles; i++) {
             float alpha = FastMath.PI * 2 * i / numParticles + startOffset;
             Vector3f velocity = App.getVectorFromAngle(alpha).multLocal(rand.nextFloat() * 200 + 300);
@@ -147,7 +148,7 @@ public class ParticleManager {
     }
 
     public void sprayParticle(Vector3f position, Vector3f sprayVel) {
-        Node parent = new Node();
+        Node parent = new GNode<>(ParticleNode.class, 1);
         ParticleNode particle = standardParticle.clone();
         particle.setLocalTranslation(position);
         ColorRGBA color = new ColorRGBA(0.8f, 0.4f, 0.8f, 1f);
@@ -171,7 +172,7 @@ public class ParticleManager {
 
         Vector3f pos = position.add(App.getVectorFromAngle(rotation).multLocal(-25f));
 
-        Node parent = new Node();
+        Node parent = new GNode<>(ParticleNode.class, 6);
         int lifespan = 800;
 
         //middle stream

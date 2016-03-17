@@ -19,6 +19,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
+import com.jme3.util.SafeArrayList;
 import com.wizzardo.neon.nodes.enemy.*;
 import com.wizzardo.neon.nodes.*;
 
@@ -131,11 +132,10 @@ public class App extends SimpleApplication {
             }
 
             // check Particles
-            Node particleNode = particleManager.getParticleNode();
+            GNode<GNode<ParticleNode>> particleNode = particleManager.getParticleNode();
             for (int j = 0; j < particleNode.getQuantity(); j++) {
-                Node parent = (Node) particleNode.getChild(j);
-                for (int k = 0; k < parent.getQuantity(); k++) {
-                    ParticleNode particle = (ParticleNode) parent.getChild(k);
+                GNode<ParticleNode> parent = particleNode.getChild(j);
+                for (ParticleNode particle : parent.getChildrenArray()) {
                     if (particle.isAffectedByGravity()) {
                         applyGravity(blackHoleNode.getChild(i), particle, tpf);
                     }
