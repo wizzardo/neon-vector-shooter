@@ -80,8 +80,4 @@ public class PlayerControl extends AbstractControl {
         left = false;
         right = false;
     }
-
-    public void applyGravity(Vector3f gravity) {
-        spatial.move(gravity);
-    }
 }

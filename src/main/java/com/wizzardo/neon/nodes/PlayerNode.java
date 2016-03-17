@@ -1,5 +1,6 @@
 package com.wizzardo.neon.nodes;
 
+import com.jme3.math.Vector3f;
 import com.jme3.scene.control.Control;
 
 import java.util.function.Consumer;
@@ -47,5 +48,10 @@ public class PlayerNode extends NodeSized {
 
     public PlayerControl getControl() {
         return control;
+    }
+
+    @Override
+    public void applyGravity(Vector3f gravity, float distance) {
+        move(gravity.multLocal(250f / distance * 80f));
     }
 }

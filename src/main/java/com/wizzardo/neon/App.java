@@ -49,7 +49,7 @@ public class App extends SimpleApplication {
 ////        turn off stats view (you can leave it on, if you want)
 //        setDisplayStatView(false);
 //        setDisplayFps(false);
-        particleManager = new ParticleManager(guiNode, getSpatial("Laser", new Particle("Laser")), getSpatial("Glow", new Particle("Glow")), settings.getWidth(), settings.getHeight());
+        particleManager = new ParticleManager(guiNode, getSpatial("Laser", new ParticleNode("Laser")), getSpatial("Glow", new ParticleNode("Glow")), settings.getWidth(), settings.getHeight());
         setupPlayer();
 
         setupUserInput();
@@ -114,8 +114,9 @@ public class App extends SimpleApplication {
             }
             //check Bullets
             for (int j = 0; j < bulletNode.getQuantity(); j++) {
-                if (isNearby(bulletNode.getChild(j), blackHole, radius)) {
-                    applyGravity(blackHole, bulletNode.getChild(j), tpf);
+                BulletNode child = (BulletNode) bulletNode.getChild(j);
+                if (isNearby(child, blackHole, radius)) {
+                    applyGravity(blackHole, child, tpf);
                 }
             }
             //check Enemies
@@ -134,7 +135,7 @@ public class App extends SimpleApplication {
             for (int j = 0; j < particleNode.getQuantity(); j++) {
                 Node parent = (Node) particleNode.getChild(j);
                 for (int k = 0; k < parent.getQuantity(); k++) {
-                    Particle particle = (Particle) parent.getChild(k);
+                    ParticleNode particle = (ParticleNode) parent.getChild(k);
                     if (particle.isAffectedByGravity()) {
                         applyGravity(blackHoleNode.getChild(i), particle, tpf);
                     }
@@ -143,25 +144,11 @@ public class App extends SimpleApplication {
         }
     }
 
-    private void applyGravity(Spatial blackHole, Spatial target, float tpf) {
+    private void applyGravity(Spatial blackHole, NodeSized target, float tpf) {
         Vector3f difference = blackHole.getLocalTranslation().subtract(target.getLocalTranslation());
-
-        Vector3f gravity = difference.normalize().multLocal(tpf);
         float distance = difference.length();
-
-        if (target.getName().equals("Player")) {
-            gravity.multLocal(250f / distance);
-            target.getControl(PlayerControl.class).applyGravity(gravity.mult(80f));
-        } else if (target.getName().equals("Bullet")) {
-            gravity.multLocal(250f / distance);
-            target.getControl(BulletControl.class).applyGravity(gravity.mult(-0.8f));
-        } else if (target.getName().equals("Seeker")) {
-            target.getControl(SeekerControl.class).applyGravity(gravity.mult(150000));
-        } else if (target.getName().equals("Wanderer")) {
-            target.getControl(WandererControl.class).applyGravity(gravity.mult(150000));
-        } else if (target.getName().equals("Laser") || target.getName().equals("Glow")) {
-            target.getControl(ParticleControl.class).applyGravity(gravity.mult(15000), distance);
-        }
+        Vector3f gravity = difference.normalizeLocal().multLocal(tpf);
+        target.applyGravity(gravity, distance);
     }
 
     private boolean isNearby(Spatial a, Spatial b, float distance) {
@@ -380,7 +367,7 @@ public class App extends SimpleApplication {
     }
 
     private Spatial createBullet(Vector3f aim) {
-        Spatial bullet = getSpatial("Bullet");
+        Spatial bullet = getSpatial("Bullet", new BulletNode("Bullet"));
         bullet.addControl(new BulletControl(aim, settings.getWidth(), settings.getHeight(), particleManager));
         return bullet;
     }
