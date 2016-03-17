@@ -7,6 +7,7 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import com.wizzardo.neon.ParticleManager;
+import com.wizzardo.neon.grid.Grid;
 
 /**
  * Created by wizzardo on 08.03.16.
@@ -18,14 +19,16 @@ public class PlayerControl extends AbstractControl {
     private float lastRotation;
     private PlayerNode player;
     private ParticleManager particleManager;
+    private Grid grid;
     private long spawnTime;
     public boolean up, down, left, right;
 
 
-    public PlayerControl(int width, int height, ParticleManager particleManager) {
+    public PlayerControl(int width, int height, ParticleManager particleManager, Grid grid) {
         this.screenWidth = width;
         this.screenHeight = height;
         this.particleManager = particleManager;
+        this.grid = grid;
         spawnTime = System.currentTimeMillis();
     }
 
@@ -67,6 +70,7 @@ public class PlayerControl extends AbstractControl {
         }
         if (up || down || left || right) {
             particleManager.makeExhaustFire(spatial.getLocalTranslation(), lastRotation, spawnTime);
+            grid.applyDirectedForce(new Vector3f(0, 0, 5000), player.getLocalTranslation(), 100);
         }
     }
 

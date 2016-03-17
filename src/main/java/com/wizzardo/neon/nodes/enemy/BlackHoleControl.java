@@ -4,6 +4,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.wizzardo.neon.App;
 import com.wizzardo.neon.ParticleManager;
+import com.wizzardo.neon.grid.Grid;
 
 import java.util.Random;
 
@@ -16,9 +17,11 @@ public class BlackHoleControl extends EnemyControl {
     private long lastSprayTime;
     private float sprayAngle;
     private Random rand;
+    private Grid grid;
 
-    public BlackHoleControl(ParticleManager particleManager) {
+    public BlackHoleControl(ParticleManager particleManager, Grid grid) {
         this.particleManager = particleManager;
+        this.grid = grid;
         hitpoints = 10;
         rand = new Random();
     }
@@ -37,6 +40,7 @@ public class BlackHoleControl extends EnemyControl {
             particleManager.sprayParticle(position, sprayVel.multLocal(30f));
         }
         sprayAngle -= FastMath.PI * tpf / 10f;
+        grid.applyImplosiveForce(FastMath.sin(sprayAngle / 2) * 10 + 20, spatial.getLocalTranslation(), 250);
     }
 
     public void wasShot() {

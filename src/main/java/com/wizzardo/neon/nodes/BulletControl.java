@@ -6,22 +6,25 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.control.AbstractControl;
 import com.wizzardo.neon.App;
 import com.wizzardo.neon.ParticleManager;
+import com.wizzardo.neon.grid.Grid;
 
 /**
  * Created by wizzardo on 08.03.16.
  */
 public class BulletControl extends AbstractControl {
+    private Grid grid;
     private ParticleManager particleManager;
     private int screenWidth, screenHeight;
     private float speed = 1100f;
     private float rotation;
     public Vector3f direction;
 
-    public BulletControl(Vector3f direction, int screenWidth, int screenHeight, ParticleManager particleManager) {
+    public BulletControl(Vector3f direction, int screenWidth, int screenHeight, ParticleManager particleManager, Grid grid) {
         this.direction = direction;
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         this.particleManager = particleManager;
+        this.grid = grid;
     }
 
     @Override
@@ -42,6 +45,8 @@ public class BulletControl extends AbstractControl {
             particleManager.bulletExplosion(loc);
             spatial.removeFromParent();
         }
+
+        grid.applyExplosiveForce(direction.length() * (18f), spatial.getLocalTranslation(), 80);
     }
 
     @Override

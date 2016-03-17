@@ -19,7 +19,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
-import com.jme3.util.SafeArrayList;
+import com.wizzardo.neon.grid.Grid;
 import com.wizzardo.neon.nodes.enemy.*;
 import com.wizzardo.neon.nodes.*;
 
@@ -42,6 +42,7 @@ public class App extends SimpleApplication {
     private Node blackHoleNode;
     private boolean gameOver = false;
     private Hud hud;
+    private Grid grid;
 
     @Override
     public void simpleInitApp() {
@@ -50,9 +51,7 @@ public class App extends SimpleApplication {
 ////        turn off stats view (you can leave it on, if you want)
 //        setDisplayStatView(false);
 //        setDisplayFps(false);
-        particleManager = new ParticleManager(guiNode, getSpatial("Laser", new ParticleNode("Laser")), getSpatial("Glow", new ParticleNode("Glow")), settings.getWidth(), settings.getHeight());
-        setupPlayer();
-
+        setupParticles();
         setupUserInput();
         setupBulletNode();
         setupEnemyNode();
@@ -61,7 +60,17 @@ public class App extends SimpleApplication {
         setupHud();
         addBloomFilter();
 
-        inputManager.setMouseCursor((JmeCursor) assetManager.loadAsset("Textures/Pointer.ico"));
+        setupGrid();
+        setupPlayer();
+    }
+
+    private void setupParticles() {
+        particleManager = new ParticleManager(guiNode, getSpatial("Laser", new ParticleNode("Laser")), getSpatial("Glow", new ParticleNode("Glow")), settings.getWidth(), settings.getHeight());
+    }
+
+    private void setupGrid() {
+        Vector2f spacing = new Vector2f(60, 60);
+        grid = new Grid(settings.getWidth(), settings.getHeight(), spacing, guiNode, assetManager);
     }
 
     private void setupHud() {
@@ -99,6 +108,7 @@ public class App extends SimpleApplication {
             player.setAlive(true);
         }
         hud.update();
+        grid.update(tpf);
     }
 
     private void handleGravity(float tpf) {
@@ -274,7 +284,7 @@ public class App extends SimpleApplication {
 
     private void createBlackHole() {
         Spatial blackHole = getSpatial("Black Hole", new EnemyNode("Black Hole"));
-        blackHole.addControl(new BlackHoleControl(particleManager));
+        blackHole.addControl(new BlackHoleControl(particleManager, grid));
 
         blackHole.setLocalTranslation(getSpawnPosition());
         blackHoleNode.attachChild(blackHole);
@@ -324,6 +334,8 @@ public class App extends SimpleApplication {
     }
 
     private void setupUserInput() {
+        inputManager.setMouseCursor((JmeCursor) assetManager.loadAsset("Textures/Pointer.ico"));
+
         inputManager.addMapping("left", new KeyTrigger(KeyInput.KEY_LEFT), new KeyTrigger(KeyInput.KEY_A));
         inputManager.addMapping("right", new KeyTrigger(KeyInput.KEY_RIGHT), new KeyTrigger(KeyInput.KEY_D));
         inputManager.addMapping("up", new KeyTrigger(KeyInput.KEY_UP), new KeyTrigger(KeyInput.KEY_W));
@@ -368,7 +380,7 @@ public class App extends SimpleApplication {
 
     private Spatial createBullet(Vector3f aim) {
         Spatial bullet = getSpatial("Bullet", new BulletNode("Bullet"));
-        bullet.addControl(new BulletControl(aim, settings.getWidth(), settings.getHeight(), particleManager));
+        bullet.addControl(new BulletControl(aim, settings.getWidth(), settings.getHeight(), particleManager, grid));
         return bullet;
     }
 
@@ -383,7 +395,7 @@ public class App extends SimpleApplication {
         //        setup the player
         player = getSpatial("Player", new PlayerNode("Player"));
         player.move(settings.getWidth() / 2, settings.getHeight() / 2, 0);
-        player.addControl(new PlayerControl(settings.getWidth(), settings.getHeight(), particleManager));
+        player.addControl(new PlayerControl(settings.getWidth(), settings.getHeight(), particleManager, grid));
         guiNode.attachChild(player);
     }
 
