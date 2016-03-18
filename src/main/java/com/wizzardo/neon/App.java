@@ -96,7 +96,7 @@ public class App extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf) {
         if (player.isAlive()) {
-//            spawnEnemies();
+            spawnEnemies();
             handleCollisions();
             handleGravity(tpf);
         } else if (System.currentTimeMillis() - player.getDieTime() > 4000f && !gameOver) {

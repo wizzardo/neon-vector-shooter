@@ -15,7 +15,7 @@ public class BulletNode extends NodeSized {
 
     @Override
     public void applyGravity(Vector3f gravity, float distance) {
-        control.applyGravity(gravity.multLocal(250f / distance * -0.8f));
+        control.applyGravity(gravity.multLocal(250f / distance * -1.3f));
     }
 
     @Override
