@@ -2,12 +2,9 @@ package com.wizzardo.neon;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.cursors.plugins.JmeCursor;
-import com.jme3.input.KeyInput;
-import com.jme3.input.MouseInput;
-import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.AnalogListener;
-import com.jme3.input.controls.KeyTrigger;
-import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.input.*;
+import com.jme3.input.controls.*;
+import com.jme3.input.event.*;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.FastMath;
@@ -17,6 +14,7 @@ import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
 import com.wizzardo.neon.grid.Grid;
@@ -98,7 +96,7 @@ public class App extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf) {
         if (player.isAlive()) {
-            spawnEnemies();
+//            spawnEnemies();
             handleCollisions();
             handleGravity(tpf);
         } else if (System.currentTimeMillis() - player.getDieTime() > 4000f && !gameOver) {
@@ -336,6 +334,16 @@ public class App extends SimpleApplication {
     private void setupUserInput() {
         inputManager.setMouseCursor((JmeCursor) assetManager.loadAsset("Textures/Pointer.ico"));
 
+        for (Joystick joystick : inputManager.getJoysticks()) {
+            System.out.println("map joystick: " + joystick);
+            for (JoystickButton button : joystick.getButtons()) {
+                System.out.println(button.getButtonId() + " " + button.getName() + " " + button.getLogicalId());
+            }
+            for (JoystickAxis axis : joystick.getAxes()) {
+                System.out.println(axis.getAxisId() + " " + axis.getName() + " " + axis.getLogicalId());
+            }
+        }
+
         inputManager.addMapping("left", new KeyTrigger(KeyInput.KEY_LEFT), new KeyTrigger(KeyInput.KEY_A));
         inputManager.addMapping("right", new KeyTrigger(KeyInput.KEY_RIGHT), new KeyTrigger(KeyInput.KEY_D));
         inputManager.addMapping("up", new KeyTrigger(KeyInput.KEY_UP), new KeyTrigger(KeyInput.KEY_W));
@@ -348,34 +356,89 @@ public class App extends SimpleApplication {
         inputManager.addListener((ActionListener) (s, b, v) -> {
         }, "return");
 
+        if (inputManager.getJoysticks().length > 0) {
+            int joyId = inputManager.getJoysticks()[0].getJoyId();
+            inputManager.addMapping("j-right", new JoyAxisTrigger(joyId, 0, false));
+            inputManager.addListener((AnalogListener) (name, value, tpf) -> {
+                if (player.isAlive())
+                    player.getControl().x = value;
+            }, "j-right");
+            inputManager.addMapping("j-left", new JoyAxisTrigger(joyId, 0, true));
+            inputManager.addListener((AnalogListener) (name, value, tpf) -> {
+                if (player.isAlive())
+                    player.getControl().x = -value;
+            }, "j-left");
+            inputManager.addMapping("j-up", new JoyAxisTrigger(joyId, 1, true));
+            inputManager.addListener((AnalogListener) (name, value, tpf) -> {
+                if (player.isAlive())
+                    player.getControl().y = value;
+            }, "j-up");
+            inputManager.addMapping("j-down", new JoyAxisTrigger(joyId, 1, false));
+            inputManager.addListener((AnalogListener) (name, value, tpf) -> {
+                if (player.isAlive())
+                    player.getControl().y = -value;
+            }, "j-down");
+
+            Vector3f aim = new Vector3f();
+            Vector3f normalizedAim = new Vector3f();
+            inputManager.addMapping("j-right-2", new JoyAxisTrigger(joyId, 3, false));
+            inputManager.addListener((AnalogListener) (name, value, tpf) -> {
+                aim.setX(value);
+                if (player.isAlive())
+                    shoot(normalizedAim.set(aim).normalizeLocal());
+            }, "j-right-2");
+            inputManager.addMapping("j-left-2", new JoyAxisTrigger(joyId, 3, true));
+            inputManager.addListener((AnalogListener) (name, value, tpf) -> {
+                aim.setX(-value);
+                if (player.isAlive())
+                    shoot(normalizedAim.set(aim).normalizeLocal());
+            }, "j-left-2");
+            inputManager.addMapping("j-up-2", new JoyAxisTrigger(joyId, 4, true));
+            inputManager.addListener((AnalogListener) (name, value, tpf) -> {
+                aim.setY(value);
+                if (player.isAlive())
+                    shoot(normalizedAim.set(aim).normalizeLocal());
+            }, "j-up-2");
+            inputManager.addMapping("j-down-2", new JoyAxisTrigger(joyId, 4, false));
+            inputManager.addListener((AnalogListener) (name, value, tpf) -> {
+                aim.setY(-value);
+                if (player.isAlive())
+                    shoot(normalizedAim.set(aim).normalizeLocal());
+            }, "j-down-2");
+
+        }
+
         inputManager.addMapping("mousePick", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addListener((AnalogListener) (name, value, tpf) -> {
             if (player.isAlive()) {
-                //shoot Bullet
-                if (System.currentTimeMillis() - lastShot > SHOOT_COOL_DOWN) {
-                    lastShot = System.currentTimeMillis();
-
-                    Vector3f aim = getAimDirection();
-                    Vector3f offset = new Vector3f(aim.y / 3, -aim.x / 3, 0);
-
-//                    init bullet 1
-                    Spatial bullet = createBullet(aim);
-                    Vector3f finalOffset = aim.add(offset).mult(30);
-                    Vector3f trans = player.getLocalTranslation().add(finalOffset);
-                    bullet.setLocalTranslation(trans);
-                    bulletNode.attachChild(bullet);
-
-//                    init bullet 2
-                    Spatial bullet2 = createBullet(aim);
-                    finalOffset = aim.add(offset.negate()).mult(30);
-                    trans = player.getLocalTranslation().add(finalOffset);
-                    bullet2.setLocalTranslation(trans);
-                    bulletNode.attachChild(bullet2);
-
-                    soundManager.shoot();
-                }
+                shoot(getAimDirection());
             }
         }, "mousePick");
+    }
+
+    private void shoot(Vector3f aim) {
+        //shoot Bullet
+        if (System.currentTimeMillis() - lastShot > SHOOT_COOL_DOWN) {
+            lastShot = System.currentTimeMillis();
+
+            Vector3f offset = new Vector3f(aim.y / 3, -aim.x / 3, 0);
+
+//                    init bullet 1
+            Spatial bullet = createBullet(aim);
+            Vector3f finalOffset = aim.add(offset).mult(30);
+            Vector3f trans = player.getLocalTranslation().add(finalOffset);
+            bullet.setLocalTranslation(trans);
+            bulletNode.attachChild(bullet);
+
+//                    init bullet 2
+            Spatial bullet2 = createBullet(aim);
+            finalOffset = aim.add(offset.negate()).mult(30);
+            trans = player.getLocalTranslation().add(finalOffset);
+            bullet2.setLocalTranslation(trans);
+            bulletNode.attachChild(bullet2);
+
+            soundManager.shoot();
+        }
     }
 
     private Spatial createBullet(Vector3f aim) {
@@ -444,6 +507,12 @@ public class App extends SimpleApplication {
 
     public static Vector3f getVectorFromAngle(float angle) {
         return new Vector3f(FastMath.cos(angle), FastMath.sin(angle), 0);
+    }
+
+    @Override
+    public void setSettings(AppSettings settings) {
+        settings.setUseJoysticks(true);
+        super.setSettings(settings);
     }
 
     public static void main(String[] args) {

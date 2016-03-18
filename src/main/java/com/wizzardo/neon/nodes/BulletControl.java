@@ -20,7 +20,7 @@ public class BulletControl extends AbstractControl {
     public Vector3f direction;
 
     public BulletControl(Vector3f direction, int screenWidth, int screenHeight, ParticleManager particleManager, Grid grid) {
-        this.direction = direction;
+        this.direction = new Vector3f(direction);
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         this.particleManager = particleManager;
