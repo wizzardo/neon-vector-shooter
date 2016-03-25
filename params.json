@@ -1,0 +1,6 @@
+{
+  "name": "Neon-vector-shooter",
+  "tagline": "",
+  "body": "Cross-Platform Vector Shooter\r\n=========\r\nbased on [tuts]\r\n\r\n![screenshot-1] \r\n![screenshot-2] \r\n![screenshot-3] \r\n![screenshot-4] \r\n![screenshot-5] \r\n\r\n[tuts]:http://gamedevelopment.tutsplus.com/series/cross-platform-vector-shooter-jmonkeyengine--gamedev-13757\r\n[screenshot-1]:https://cdn.tutsplus.com/gamedev/uploads/2013/10/MonkeyBlaster_1_Preview_Big.png\r\n[screenshot-2]:https://cdn.tutsplus.com/gamedev/uploads/2013/10/MonkeyBlaster_2_Preview_Big.png\r\n[screenshot-3]:https://cdn.tutsplus.com/gamedev/uploads/2013/10/MonkeyBlaster_3_Preview_Big.png\r\n[screenshot-4]:https://cdn.tutsplus.com/gamedev/uploads/2013/10/MonkeyBlaster_4_Preview_Big.png\r\n[screenshot-5]:https://cdn.tutsplus.com/gamedev/uploads/2013/10/MonkeyBlaster_5_Preview_Big.png",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
